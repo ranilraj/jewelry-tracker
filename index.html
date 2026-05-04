@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
-  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -13,6 +13,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
     * {
       box-sizing: border-box;
@@ -22,11 +23,13 @@
     }
 
     body {
-      background: #0d0d0f;
+      background: #000000;
       color: #e8e8e8;
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
+      color-scheme: dark;
+      accent-color: #f97316;
     }
 
     ::-webkit-scrollbar {
@@ -51,7 +54,7 @@
     }
 
     .header {
-      background: linear-gradient(180deg, #1a1007 0%, #0d0d0f 100%);
+      background: linear-gradient(180deg, #1a1007 0%, #000000 100%);
       border-bottom: 1px solid #2a2010;
       padding: 14px 16px;
       position: sticky;
@@ -64,7 +67,7 @@
 
     .back-btn {
       background: rgba(255, 255, 255, .05);
-      border: 1px solid #2a2a30;
+      border: 1px solid #222222;
       color: #aaa;
       border-radius: 8px;
       width: 36px;
@@ -93,7 +96,7 @@
     .new-btn {
       margin-left: auto;
       background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #0d0d0f;
+      color: #000000;
       font-weight: 700;
       border-radius: 10px;
       padding: 9px 15px;
@@ -112,8 +115,8 @@
     }
 
     .stat {
-      background: #16161a;
-      border: 1px solid #2a2a30;
+      background: #0a0a0a;
+      border: 1px solid #222222;
       border-radius: 12px;
       padding: 14px 8px;
       text-align: center;
@@ -134,8 +137,8 @@
     }
 
     .bcard {
-      background: #16161a;
-      border: 1px solid #2a2a30;
+      background: #0a0a0a;
+      border: 1px solid #222222;
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 10px;
@@ -200,8 +203,8 @@
     }
 
     .card {
-      background: #16161a;
-      border: 1px solid #2a2a30;
+      background: #0a0a0a;
+      border: 1px solid #222222;
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 12px;
@@ -224,7 +227,7 @@
     }
 
     .inp {
-      background: #1e1e24;
+      background: #111111;
       border: 1px solid #2e2e38;
       border-radius: 8px;
       color: #e8e8e8;
@@ -239,7 +242,7 @@
     }
 
     .inp-sm {
-      background: #1e1e24;
+      background: #111111;
       border: 1px solid #2e2e38;
       border-radius: 8px;
       color: #e8e8e8;
@@ -254,6 +257,60 @@
       border-color: #f59e0b;
     }
 
+    /* Flatpickr Orange & Black Theme */
+    .flatpickr-calendar {
+      background: #111111 !important;
+      border: 1px solid #222222 !important;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5) !important;
+    }
+    .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after,
+    .flatpickr-calendar.arrowBottom:before, .flatpickr-calendar.arrowBottom:after {
+      display: none !important;
+    }
+    .flatpickr-day {
+      color: #e8e8e8 !important;
+    }
+    .flatpickr-day:hover, .flatpickr-day:focus {
+      background: #222222 !important;
+      border-color: #222222 !important;
+    }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+      background: #f97316 !important;
+      border-color: #f97316 !important;
+      color: #000 !important;
+      font-weight: bold;
+    }
+    .flatpickr-day.today {
+      border-color: #f97316 !important;
+    }
+    .flatpickr-day.today:hover, .flatpickr-day.today:focus {
+      border-color: #f97316 !important;
+      background: #f9731633 !important;
+      color: #e8e8e8 !important;
+    }
+    .flatpickr-months .flatpickr-month {
+      background: #111111 !important;
+      color: #e8e8e8 !important;
+      fill: #e8e8e8 !important;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+      background: #111111 !important;
+      color: #e8e8e8 !important;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
+      background-color: #111111 !important;
+    }
+    .flatpickr-weekday {
+      background: #111111 !important;
+      color: #aaa !important;
+    }
+    .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {
+      fill: #f97316 !important;
+    }
+    .flatpickr-time input:hover, .flatpickr-time .flatpickr-am-pm:hover, .flatpickr-time input:focus, .flatpickr-time .flatpickr-am-pm:focus {
+      background: #222222 !important;
+    }
+
     textarea.inp {
       resize: none;
     }
@@ -263,7 +320,7 @@
       align-items: center;
       gap: 12px;
       padding: 11px 0;
-      border-bottom: 1px solid #1e1e24;
+      border-bottom: 1px solid #111111;
     }
 
     .srow:last-of-type {
@@ -299,7 +356,7 @@
     .total-row {
       margin-top: 12px;
       padding: 10px 12px;
-      background: #1e1e24;
+      background: #111111;
       border-radius: 8px;
       display: flex;
       justify-content: space-between;
@@ -402,7 +459,7 @@
 
     .btn-gold {
       background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #0d0d0f;
+      color: #000000;
       font-weight: 700;
       border-radius: 10px;
       padding: 11px 0;
@@ -413,7 +470,7 @@
     .btn-ghost {
       background: transparent;
       color: #aaa;
-      border: 1px solid #2a2a30;
+      border: 1px solid #222222;
       border-radius: 10px;
       padding: 11px 0;
       font-size: 14px;
@@ -422,7 +479,7 @@
 
     .btn-edit {
       background: transparent;
-      border: 1px solid #2a2a30;
+      border: 1px solid #222222;
       color: #aaa;
       border-radius: 8px;
       padding: 8px 14px;
@@ -440,7 +497,7 @@
 
     .btn-save {
       background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #0d0d0f;
+      color: #000000;
       font-weight: 700;
       border-radius: 8px;
       padding: 8px 16px;
@@ -450,7 +507,7 @@
     .btn-cancel {
       background: transparent;
       color: #aaa;
-      border: 1px solid #2a2a30;
+      border: 1px solid #222222;
       border-radius: 8px;
       padding: 8px 14px;
       font-size: 13px;
@@ -466,8 +523,8 @@
     }
 
     .sheet {
-      background: #1a1a1f;
-      border-top: 1px solid #2a2a30;
+      background: #111111;
+      border-top: 1px solid #222222;
       border-radius: 20px 20px 0 0;
       padding: 24px 20px;
       width: 100%;
@@ -508,6 +565,7 @@
 <body>
   <div id="app"></div>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
     // --- SUPABASE CONFIGURATION ---
     // 1. Replace these with your actual Supabase project URL and Anon Key
@@ -516,22 +574,43 @@
     const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // ------------------------------
 
-    const STAGE_COLORS = ['#f59e0b', '#f97316', '#10b981', '#6366f1', '#ec4899', '#fbbf24', '#06b6d4', '#8b5cf6'];
+    const STAGE_COLORS = ['#fb923c', '#f97316', '#ea580c', '#c2410c', '#f59e0b', '#d97706', '#b45309', '#9a3412'];
 
     function fmt(n) { return Number(n).toLocaleString('en-IN'); }
     function sfmt(n) { n = parseFloat(n); if (isNaN(n)) return '0'; return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : fmt(n); }
+    function parseDateObj(s) {
+      if (!s) return new Date(NaN);
+      if (s.includes('-')) return new Date(s);
+      const parts = s.split('/');
+      if (parts.length === 3) {
+        let [d, m, y] = parts;
+        if (y.length === 2) y = '20' + y;
+        return new Date(`${y}-${m}-${d}`);
+      }
+      return new Date(NaN);
+    }
+    function fmtDateUI(s) {
+      const d = parseDateObj(s);
+      if (isNaN(d)) return s;
+      return d.toLocaleDateString('en-GB', {day:'2-digit', month:'2-digit', year:'2-digit'});
+    }
+    function toInputDate(s) {
+      const d = parseDateObj(s);
+      if (isNaN(d)) return '';
+      return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    }
+
     function getDaysHTML(start, end, isDetail) {
       if (!start) return '';
-      const p = s => { const [d, m, y] = s.split('/'); return new Date(`20${y}-${m}-${d}`); };
-      const d1 = p(start);
+      const d1 = parseDateObj(start);
       if (isNaN(d1)) return '';
 
       if (end) {
-        const d2 = p(end);
+        const d2 = parseDateObj(end);
         if (!isNaN(d2)) {
           const days = Math.max(0, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)));
           if (isDetail) return `<span style="color:#10b981;font-weight:bold;">TOOK ${days} DAYS TO COMPLETE</span>`;
-          return `<span style="margin-left:8px;background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:4px;color:#10b981;font-weight:bold;">Took ${days} days</span>`;
+          return `<span style="margin-left:8px;background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:4px;color:#10b981;font-weight:bold;font-size:10px;">Took ${days} Days</span>`;
         }
       }
 
@@ -539,7 +618,7 @@
       today.setHours(0, 0, 0, 0);
       const diff = Math.max(0, Math.floor((today - d1) / (1000 * 60 * 60 * 24)));
       if (isDetail) return `<span style="color:#f59e0b;font-weight:bold;">RUNNING DAY ${diff + 1}</span>`;
-      return `<span style="margin-left:8px;background:rgba(245,158,11,0.15);padding:2px 6px;border-radius:4px;color:#f59e0b;font-weight:bold;">Day ${diff + 1}</span>`;
+      return `<span style="margin-left:8px;background:rgba(245,158,11,0.15);padding:2px 6px;border-radius:4px;color:#f59e0b;font-weight:bold;font-size:10px;">Running Day ${diff + 1}</span>`;
     }
     function totalCost(st) {
       if (!Array.isArray(st)) return 0;
@@ -588,7 +667,7 @@
         const v = stage.cost; const h = v !== '' && v != null;
         const clr = STAGE_COLORS[i % STAGE_COLORS.length];
         const nameStr = (stage.name || 'Stage').substring(0, 3).toUpperCase();
-        return `<span class="pill" style="background:${h ? clr + '22' : 'transparent'};color:${h ? clr : '#444'};border:1px solid ${h ? clr + '55' : '#2a2a30'}">${nameStr}${h ? ' ₹' + sfmt(v) : ''}</span>`;
+        return `<span class="pill" style="background:${h ? clr + '22' : 'transparent'};color:${h ? clr : '#444'};border:1px solid ${h ? clr + '55' : '#222222'}">${nameStr}${h ? ' ₹' + sfmt(v) : ''}</span>`;
       }).join('');
     }
     function stagesFilled(st) { return Array.isArray(st) ? st.filter(s => s.cost !== '' && s.cost != null).length : 0; }
@@ -655,7 +734,7 @@
           const cost = totalCost(b.stages); const sell = parseFloat(b.sellingPrice);
           return `<div class="bcard" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div class="bname">${b.name}</div><div class="bdate">${b.date}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
+          <div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}
           </div>
         </div>
@@ -696,16 +775,16 @@
   <div class="content" style="padding-top:16px">
     <div class="card">
       <label class="lbl">ORDER NAME</label>
-      <input class="inp" id="n_name" placeholder="e.g. SD COVERING ORDER" value="${nd.name}" oninput="nd_set('name',this.value)"/>
+      <input class="inp" id="n_name" placeholder="Order Name" value="${nd.name}" oninput="nd_set('name',this.value)"/>
     </div>
     <div class="card">
       <div class="flex2">
-        <div><label class="lbl">START DATE</label><input class="inp" id="n_date" placeholder="DD/MM/YY" value="${nd.date}" oninput="nd_set('date',this.value)"/></div>
+        <div><label class="lbl">START DATE</label><input class="inp fp-date" type="text" data-placeholder="Select Date" placeholder="Select Date" value="${toInputDate(nd.date)}" oninput="nd_set('date',this.value);"/></div>
         <div><label class="lbl">TOTAL QTY (pcs)</label><input class="inp" type="number" placeholder="0" value="${nd.qty}" oninput="nd_set('qty',this.value)"/></div>
       </div>
       <div style="margin-top:12px">
         <label class="lbl">COMPLETION DATE (optional)</label>
-        <input class="inp" placeholder="DD/MM/YY" value="${nd.sellingDate || ''}" oninput="nd_set('sellingDate',this.value)"/>
+        <input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(nd.sellingDate)}" oninput="nd_set('sellingDate',this.value);"/>
       </div>
     </div>
     <div class="card">
@@ -716,11 +795,17 @@
       <div style="margin-bottom:12px;">
       ${(!nd.stages || nd.stages.length === 0) ? `<div class="empty" style="padding:20px 0;font-size:11px;">No stages added.</div>` : nd.stages.map((stg, i) => {
         const clr = STAGE_COLORS[i % STAGE_COLORS.length];
-        return `<div class="srow" style="gap:8px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
-          <input class="inp" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="Stage name" value="${stg.name}" oninput="updateStageName(false, ${i}, this.value)" />
-          <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ 0" value="${stg.cost}" oninput="updateStageCost(false, ${i}, this.value)" />
-          <button class="btn-del" style="padding:8px 10px;" onclick="removeStage(false, ${i})">🗑</button>
+        return `<div class="srow" style="flex-wrap:wrap; gap:8px;">
+          <div style="width:100%; display:flex; align-items:center; gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
+            <input class="inp" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="Stage name" value="${stg.name}" oninput="updateStageName(false, ${i}, this.value)" />
+            <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ 0" value="${stg.cost}" oninput="updateStageCost(false, ${i}, this.value)" />
+            <button class="btn-del" style="padding:8px 10px;" onclick="removeStage(false, ${i})">🗑</button>
+          </div>
+          <div style="width:100%; display:flex; align-items:center; gap:8px; padding-left:16px;">
+            <span style="font-size:11px; color:#666;">Date:</span>
+            <input class="inp-sm fp-date" type="text" data-placeholder="Date" placeholder="Date" style="flex:1; padding:6px 10px; font-size:12px; text-align:left;" value="${toInputDate(stg.date)}" oninput="updateStageDate(false, ${i}, this.value);" />
+          </div>
         </div>`;
       }).join('')}
       </div>
@@ -754,17 +839,26 @@
         const clr = STAGE_COLORS[i % STAGE_COLORS.length];
 
         if (editMode) {
-          return `<div class="srow" style="gap:8px;">
-        <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
-        <input class="inp" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="Stage name" value="${stg.name}" oninput="updateStageName(true, ${i}, this.value)" />
-        <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ 0" value="${val}" oninput="updateStageCost(true, ${i}, this.value)" />
-        <button class="btn-del" style="padding:8px 10px;" onclick="removeStage(true, ${i})">🗑</button>
+          return `<div class="srow" style="flex-wrap:wrap; gap:8px;">
+        <div style="width:100%; display:flex; align-items:center; gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
+          <input class="inp" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="Stage name" value="${stg.name}" oninput="updateStageName(true, ${i}, this.value)" />
+          <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ 0" value="${val}" oninput="updateStageCost(true, ${i}, this.value)" />
+          <button class="btn-del" style="padding:8px 10px;" onclick="removeStage(true, ${i})">🗑</button>
+        </div>
+        <div style="width:100%; display:flex; align-items:center; gap:8px; padding-left:16px;">
+          <span style="font-size:11px; color:#666;">Date:</span>
+          <input class="inp-sm fp-date" type="text" data-placeholder="Date" placeholder="Date" style="flex:1; padding:6px 10px; font-size:12px; text-align:left;" value="${toInputDate(stg.date)}" oninput="updateStageDate(true, ${i}, this.value);" />
+        </div>
       </div>`;
         } else {
-          return `<div class="srow">
-        <div class="snum" style="background:${has ? clr + '22' : '#1e1e24'};border:1px solid ${has ? clr + '55' : '#2a2a30'};color:${has ? clr : '#444'}">${i + 1}</div>
-        <span class="sname" style="color:${has ? '#ddd' : '#666'}">${stg.name || 'Unnamed Stage'}</span>
-        <span class="sval" style="color:${has ? clr : '#333'}">${has ? '₹' + fmt(val) : '—'}</span>
+          return `<div class="srow" style="flex-wrap:wrap; gap:4px;">
+        <div style="width:100%; display:flex; align-items:center; gap:12px;">
+          <div class="snum" style="background:${has ? clr + '22' : '#111111'};border:1px solid ${has ? clr + '55' : '#222222'};color:${has ? clr : '#444'}">${i + 1}</div>
+          <span class="sname" style="color:${has ? '#ddd' : '#666'}">${stg.name || 'Unnamed Stage'}</span>
+          <span class="sval" style="color:${has ? clr : '#333'}">${has ? '₹' + fmt(val) : '—'}</span>
+        </div>
+        ${stg.date ? `<div style="width:100%; padding-left:42px; font-size:10px; color:#888;">${fmtDateUI(stg.date)}</div>` : ''}
       </div>`;
         }
       }).join('');
@@ -779,8 +873,10 @@
     </div>
   </div>
   <div class="content" style="padding-top:16px">
-    <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;">
-      <span>START: ${d.date}</span>
+    <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+      ${editMode 
+        ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date" data-placeholder="Start Date" placeholder="Start Date" style="padding:4px 8px;font-size:11px;" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
+        : `<span>START: ${fmtDateUI(d.date)}</span>`}
       ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
     ${profitCardHTML(d.stages, d.sellingPrice, d.qty)}
@@ -810,8 +906,8 @@
       </div>
       <div>
         <label class="lbl">COMPLETION DATE</label>
-        ${editMode ? `<input class="inp" placeholder="DD/MM/YY" value="${d.sellingDate || ''}" oninput="dr_set('sellingDate',this.value)"/>`
-          : `<div class="price-static" style="color:#aaa;font-size:14px">${d.sellingDate || '—'}</div>`}
+        ${editMode ? `<input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(d.sellingDate)}" oninput="dr_set('sellingDate',this.value);"/>`
+          : `<div class="price-static" style="color:#aaa;font-size:14px">${fmtDateUI(d.sellingDate) || '—'}</div>`}
       </div>
     </div>
     ${(editMode || d.notes) ? `<div class="card"><div class="clbl">NOTES</div>
@@ -834,7 +930,7 @@
     // Actions
     function goList() { view = 'list'; selId = null; editMode = false; draft = null; delConf = false; render(); }
     function goNew() {
-      newB = { name: '', date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }), qty: '', stages: [], sellingPrice: '', sellingDate: '', notes: '' };
+      newB = { name: '', date: new Date().toLocaleDateString('en-CA'), qty: '', stages: [], sellingPrice: '', sellingDate: '', notes: '' };
       view = 'new'; render();
     }
     function openDetail(id) { selId = id; editMode = false; draft = null; view = 'detail'; render(); }
@@ -871,7 +967,7 @@
     function addStage(isDraft) {
       const target = isDraft ? draft : newB;
       if (!target.stages) target.stages = [];
-      target.stages.push({ name: '', cost: '' });
+      target.stages.push({ name: '', cost: '', date: '' });
       render();
     }
     function removeStage(isDraft, idx) {
@@ -886,6 +982,10 @@
     function updateStageCost(isDraft, idx, val) {
       const target = isDraft ? draft : newB;
       target.stages[idx].cost = val;
+    }
+    function updateStageDate(isDraft, idx, val) {
+      const target = isDraft ? draft : newB;
+      target.stages[idx].date = val;
     }
 
     async function createBatch() {
@@ -910,6 +1010,17 @@
       else if (view === 'new') html = renderNew();
       else if (view === 'detail') html = renderDetail();
       document.getElementById('app').innerHTML = html;
+      
+      setTimeout(() => {
+        flatpickr('.fp-date', {
+          dateFormat: "Y-m-d",
+          disableMobile: true,
+          onChange: function(selectedDates, dateStr, instance) {
+            instance.element.value = dateStr;
+            instance.element.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+      }, 0);
     }
 
     render();

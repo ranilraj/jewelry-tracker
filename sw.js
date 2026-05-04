@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ranil-tracker-v1';
+const CACHE_NAME = 'ranil-tracker-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -7,14 +7,27 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      }));
+    })
+  );
+});
+
 self.addEventListener('fetch', (e) => {
-  // Use a simple network-first strategy for dynamic data, cache-first for static assets
-  if (e.request.url.includes('supabase.co')) {
+  // Use a simple network-first strategy for dynamic data AND HTML
+  if (e.request.mode === 'navigate' || e.request.url.includes('supabase.co')) {
     e.respondWith(
       fetch(e.request).catch(() => caches.match(e.request))
     );
