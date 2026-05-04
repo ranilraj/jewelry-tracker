@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#0d0d0f"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Ranil Jewellers"/>
+<title>Ranil Jewellers – Batch Tracker</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0d0d0f;color:#e8e8e8;font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
+input,textarea,button{font-family:'DM Sans',sans-serif;outline:none;}
+button{cursor:pointer;border:none;}
+
+.header{background:linear-gradient(180deg,#1a1007 0%,#0d0d0f 100%);border-bottom:1px solid #2a2010;padding:14px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px;}
+.back-btn{background:rgba(255,255,255,.05);border:1px solid #2a2a30;color:#aaa;border-radius:8px;width:36px;height:36px;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand{font-family:monospace;color:#f59e0b;font-size:9px;letter-spacing:3px;margin-bottom:2px;text-transform:uppercase;}
+.title{font-weight:700;font-size:17px;}
+.new-btn{margin-left:auto;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0d0d0f;font-weight:700;border-radius:10px;padding:9px 15px;font-size:13px;}
+.content{padding:0 16px 50px;}
+
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;}
+.stat{background:#16161a;border:1px solid #2a2a30;border-radius:12px;padding:14px 8px;text-align:center;}
+.stat-lbl{font-family:monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:5px;}
+.stat-val{font-family:monospace;font-weight:700;font-size:15px;}
+
+.bcard{background:#16161a;border:1px solid #2a2a30;border-radius:14px;padding:16px;margin-bottom:10px;transition:border-color .2s;}
+.bcard:active{border-color:#f59e0b55;background:#17160e;}
+.bname{font-weight:700;font-size:15px;}
+.bdate{font-family:monospace;font-size:11px;color:#666;margin-top:2px;}
+
+.pills{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;}
+.pill{font-size:10px;font-family:monospace;padding:2px 7px;border-radius:5px;}
+
+.prog{display:flex;gap:3px;margin-bottom:4px;}
+.prog-bar{flex:1;height:5px;border-radius:3px;}
+.prog-lbl{font-family:monospace;font-size:10px;color:#888;}
+
+.badge{font-family:monospace;font-size:12px;font-weight:700;padding:2px 10px;border-radius:6px;}
+
+.card{background:#16161a;border:1px solid #2a2a30;border-radius:14px;padding:16px;margin-bottom:12px;}
+.clbl{font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:10px;}
+.lbl{font-size:11px;color:#666;letter-spacing:.5px;margin-bottom:5px;display:block;}
+
+.inp{background:#1e1e24;border:1px solid #2e2e38;border-radius:8px;color:#e8e8e8;padding:10px 14px;font-size:14px;width:100%;transition:border-color .2s;}
+.inp:focus{border-color:#f59e0b;}
+.inp-sm{background:#1e1e24;border:1px solid #2e2e38;border-radius:8px;color:#e8e8e8;padding:9px 12px;font-size:13px;width:140px;text-align:right;transition:border-color .2s;}
+.inp-sm:focus{border-color:#f59e0b;}
+textarea.inp{resize:none;}
+
+.srow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #1e1e24;}
+.srow:last-of-type{border-bottom:none;}
+.snum{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;font-weight:700;flex-shrink:0;}
+.sname{font-family:monospace;font-size:13px;flex:1;}
+.sval{font-family:monospace;font-weight:700;font-size:16px;margin-left:auto;}
+
+.total-row{margin-top:12px;padding:10px 12px;background:#1e1e24;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.total-lbl{font-family:monospace;font-size:12px;color:#666;}
+.total-val{font-family:monospace;font-weight:700;color:#f97316;}
+
+.profit-card{border-radius:14px;padding:16px;margin-bottom:14px;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;}
+.plbl{font-family:monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:4px;}
+.pval{font-family:monospace;font-weight:700;font-size:14px;}
+.pdiv{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);}
+.prow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.prow:last-child{margin-bottom:0;}
+.prow-lbl{font-size:13px;color:#888;}
+.prow-val{font-family:monospace;font-weight:700;font-size:16px;}
+.prow-val-sm{font-family:monospace;font-size:13px;color:#aaa;}
+
+.flex2{display:flex;gap:10px;}
+.flex2>div{flex:1;}
+.price-static{font-family:monospace;font-weight:700;font-size:18px;padding:8px 0;}
+
+.btn-row{display:flex;gap:10px;}
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0d0d0f;font-weight:700;border-radius:10px;padding:11px 0;font-size:14px;flex:2;}
+.btn-ghost{background:transparent;color:#aaa;border:1px solid #2a2a30;border-radius:10px;padding:11px 0;font-size:14px;flex:1;}
+.btn-edit{background:transparent;border:1px solid #2a2a30;color:#aaa;border-radius:8px;padding:8px 14px;font-size:13px;}
+.btn-del{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:8px 12px;font-size:13px;}
+.btn-save{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0d0d0f;font-weight:700;border-radius:8px;padding:8px 16px;font-size:13px;}
+.btn-cancel{background:transparent;color:#aaa;border:1px solid #2a2a30;border-radius:8px;padding:8px 14px;font-size:13px;}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:200;}
+.sheet{background:#1a1a1f;border-top:1px solid #2a2a30;border-radius:20px 20px 0 0;padding:24px 20px;width:100%;}
+.sheet h3{font-size:17px;margin-bottom:8px;}
+.sheet p{font-size:13px;color:#888;margin-bottom:20px;}
+.btn-del-confirm{background:#ef4444;color:#fff;font-weight:700;border-radius:10px;padding:11px 0;font-size:14px;flex:2;}
+
+.empty{text-align:center;color:#555;padding:60px 0;font-family:monospace;font-size:12px;line-height:2;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+// --- SUPABASE CONFIGURATION ---
+// 1. Replace these with your actual Supabase project URL and Anon Key
+const SUPABASE_URL = 'https://cnspaarxnigdglcvjghc.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_FFtC1lxP8uCWuDBFQ1WGOA_N0rZS4rt';
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ------------------------------
+
+const STAGE_COLORS = ['#f59e0b', '#f97316', '#10b981', '#6366f1', '#ec4899', '#fbbf24', '#06b6d4', '#8b5cf6'];
+
+function fmt(n){return Number(n).toLocaleString('en-IN');}
+function sfmt(n){n=parseFloat(n);if(isNaN(n))return'0';return n>=1000?(n/1000).toFixed(1)+'k':fmt(n);}
+function totalCost(st){
+  if(!Array.isArray(st)) return 0;
+  return st.reduce((s, stg)=>{const v=parseFloat(stg.cost);return s+(isNaN(v)?0:v);},0);
+}
+function profPct(cost,sell){cost=parseFloat(cost);sell=parseFloat(sell);if(!cost||!sell||isNaN(cost)||isNaN(sell))return null;return((sell-cost)/cost*100);}
+
+// State
+let batches=[];
+let view='list';
+let selId=null;
+let editMode=false;
+let draft=null;
+let newB=null;
+let delConf=false;
+
+async function loadData(){
+  try {
+    const { data, error } = await sbClient
+      .from('batches')
+      .select('*')
+      .order('id', { ascending: false });
+    
+    if (error) throw error;
+    batches = data || [];
+  } catch (err) {
+    console.error('Error loading data:', err);
+    batches = [];
+  }
+  render();
+}
+// saveData() removed, data is now saved directly to Supabase in actions
+
+function progBars(st){
+  if(!Array.isArray(st)) return '';
+  return st.map((stage, i)=>{
+    const h=stage.cost!==''&&stage.cost!=null;
+    const clr=STAGE_COLORS[i%STAGE_COLORS.length];
+    return`<div class="prog-bar" style="background:${h?clr:'rgba(255,255,255,0.08)'}"></div>`;
+  }).join('');
+}
+function pillsHTML(st){
+  if(!Array.isArray(st)) return '';
+  return st.map((stage, i)=>{
+    const v=stage.cost;const h=v!==''&&v!=null;
+    const clr=STAGE_COLORS[i%STAGE_COLORS.length];
+    const nameStr=(stage.name||'Stage').substring(0,3).toUpperCase();
+    return`<span class="pill" style="background:${h?clr+'22':'transparent'};color:${h?clr:'#444'};border:1px solid ${h?clr+'55':'#2a2a30'}">${nameStr}${h?' ₹'+sfmt(v):''}</span>`;
+  }).join('');
+}
+function stagesFilled(st){return Array.isArray(st)?st.filter(s=>s.cost!==''&&s.cost!=null).length:0;}
+function totalStages(st){return Array.isArray(st)?st.length:0;}
+function badgeHTML(cost,sell){
+  const p=profPct(cost,sell);if(p===null)return'';
+  const isP=p>=0;const c=isP?'#10b981':'#ef4444';
+  return`<span class="badge" style="background:${isP?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'};color:${c};border:1px solid ${c}">${isP?'▲':'▼'} ${Math.abs(p).toFixed(1)}%</span>`;
+}
+function profitCardHTML(st,selling,qty){
+  const cost=totalCost(st);const sell=parseFloat(selling);
+  if(!cost||!sell||isNaN(sell))return'';
+  const profit=sell-cost;const pct=(profit/cost*100);const isP=profit>=0;
+  const clr=isP?'#10b981':'#ef4444';
+  let qrow='';
+  if(parseFloat(qty)>0)qrow=`<div class="prow"><span class="prow-lbl">Cost per piece (${fmt(qty)} pcs)</span><span class="prow-val-sm">₹${(cost/parseFloat(qty)).toFixed(2)}</span></div>`;
+  return`<div class="profit-card" style="background:${isP?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)'};border:1px solid ${isP?'#10b98133':'#ef444433'}">
+    <div class="pgrid">
+      <div><div class="plbl">TOTAL COST</div><div class="pval" style="color:#aaa">₹${fmt(cost)}</div></div>
+      <div><div class="plbl">SELLING</div><div class="pval" style="color:#f59e0b">₹${fmt(sell)}</div></div>
+      <div><div class="plbl">PROFIT %</div><div class="pval" style="color:${clr}">${isP?'+':''}${pct.toFixed(1)}%</div></div>
+    </div>
+    <div class="pdiv">
+      <div class="prow"><span class="prow-lbl">Net ${isP?'Profit':'Loss'}</span><span class="prow-val" style="color:${clr}">${isP?'+':'−'}₹${fmt(Math.abs(profit))}</span></div>
+      ${qrow}
+    </div>
+  </div>`;
+}
+
+// Views
+function renderList(){
+  const total=batches.length;
+  const spend=batches.reduce((s,b)=>s+totalCost(b.stages),0);
+  const pb=batches.filter(b=>b.sellingPrice&&totalCost(b.stages));
+  const avg=pb.length?pb.reduce((s,b)=>{const c=totalCost(b.stages),sp=parseFloat(b.sellingPrice);return s+((sp-c)/c*100);},0)/pb.length:0;
+
+  const cards=batches.length===0?`<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>`:
+    batches.map(b=>{
+      const cost=totalCost(b.stages);const sell=parseFloat(b.sellingPrice);
+      return`<div class="bcard" onclick="openDetail(${b.id})">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div><div class="bname">${b.name}</div><div class="bdate">${b.date}</div></div>
+          <div style="text-align:right">${badgeHTML(cost,sell)}${cost>0?`<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>`:''}
+          </div>
+        </div>
+        <div class="pills">${pillsHTML(b.stages)}</div>
+        <div class="prog">${progBars(b.stages)}</div>
+        <div class="prog-lbl">${stagesFilled(b.stages)}/${totalStages(b.stages)} stages recorded</div>
+      </div>`;
+    }).join('');
+
+  return`<div class="header">
+    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Batch Tracker</div></div>
+    <button class="new-btn" onclick="goNew()">+ New Batch</button>
+  </div>
+  <div class="content">
+    <div class="stats">
+      <div class="stat"><div class="stat-lbl">BATCHES</div><div class="stat-val" style="color:#f59e0b">${total}</div></div>
+      <div class="stat"><div class="stat-lbl">TOTAL SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend)}</div></div>
+      <div class="stat"><div class="stat-lbl">AVG PROFIT</div><div class="stat-val" style="color:${avg>=0?'#10b981':'#ef4444'}">${avg.toFixed(1)}%</div></div>
+    </div>
+    ${cards}
+  </div>`;
+}
+
+function renderNew(){
+  const nd=newB;
+  const cost=totalCost(nd.stages);const sell=parseFloat(nd.sellingPrice);
+  const profRow=cost&&sell&&!isNaN(sell)?`
+    <div style="margin-top:10px;padding:10px 12px;background:${((sell-cost)/cost*100)>=0?'rgba(16,185,129,0.08)':'rgba(239,68,68,0.08)'};border:1px solid ${((sell-cost)/cost*100)>=0?'#10b98133':'#ef444433'};border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:#aaa">Profit</span>
+      <span style="font-family:monospace;font-weight:700;color:${((sell-cost)/cost*100)>=0?'#10b981':'#ef4444'}">${((sell-cost)/cost*100)>=0?'+':''}${((sell-cost)/cost*100).toFixed(1)}%  (₹${fmt(Math.abs(sell-cost))})</span>
+    </div>`:'';
+
+  return`<div class="header">
+    <button class="back-btn" onclick="goList()">←</button>
+    <div><div class="brand">RANIL JEWELLERS</div><div class="title">New Batch</div></div>
+  </div>
+  <div class="content" style="padding-top:16px">
+    <div class="card">
+      <label class="lbl">ORDER NAME</label>
+      <input class="inp" id="n_name" placeholder="e.g. SD COVERING ORDER" value="${nd.name}" oninput="nd_set('name',this.value)"/>
+    </div>
+    <div class="card">
+      <div class="flex2">
+        <div><label class="lbl">DATE</label><input class="inp" id="n_date" placeholder="DD/MM/YY" value="${nd.date}" oninput="nd_set('date',this.value)"/></div>
+        <div><label class="lbl">TOTAL QTY (pcs)</label><input class="inp" type="number" placeholder="0" value="${nd.qty}" oninput="nd_set('qty',this.value)"/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>STAGES & COSTS</span>
+        <button class="btn-edit" onclick="addStage(false)">+ Add Stage</button>
+      </div>
+      <div style="margin-bottom:12px;">
+      ${(!nd.stages || nd.stages.length===0) ? `<div class="empty" style="padding:20px 0;font-size:11px;">No stages added.</div>` : nd.stages.map((stg, i)=>{
+        const clr = STAGE_COLORS[i % STAGE_COLORS.length];
+        return `<div class="srow" style="gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
+          <input class="inp" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="Stage name" value="${stg.name}" oninput="updateStageName(false, ${i}, this.value)" />
+          <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ 0" value="${stg.cost}" oninput="updateStageCost(false, ${i}, this.value)" />
+          <button class="btn-del" style="padding:8px 10px;" onclick="removeStage(false, ${i})">🗑</button>
+        </div>`;
+      }).join('')}
+      </div>
+      ${cost>0?`<div class="total-row"><span class="total-lbl">TOTAL COST</span><span class="total-val">₹${fmt(cost)}</span></div>`:''}
+    </div>
+    <div class="card">
+      <div class="clbl">SELLING PRICE (₹ total batch)</div>
+      <input class="inp" type="number" placeholder="Total selling amount" value="${nd.sellingPrice}" oninput="nd_set('sellingPrice',this.value);render()"/>
+      ${profRow}
+    </div>
+    <div class="card">
+      <label class="lbl">NOTES (optional)</label>
+      <textarea class="inp" rows="3" placeholder="Any notes..." oninput="nd_set('notes',this.value)">${nd.notes}</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn-ghost" onclick="goList()">Cancel</button>
+      <button class="btn-gold" onclick="createBatch()">Create Batch</button>
+    </div>
+  </div>`;
+}
+
+function renderDetail(){
+  const b=batches.find(x=>x.id===selId);if(!b)return renderList();
+  const d=editMode?draft:b;
+  const cost=totalCost(d.stages);const sell=parseFloat(d.sellingPrice);
+
+  const stagesList = Array.isArray(d.stages) ? d.stages : [];
+  const stagesHTML = stagesList.map((stg, i) => {
+    const val = stg.cost; 
+    const has = val !== '' && val != null && val !== undefined;
+    const clr = STAGE_COLORS[i % STAGE_COLORS.length];
+    
+    if (editMode) {
+      return `<div class="srow" style="gap:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
+        <input class="inp" style="flex:1; padding:8px 10px; font-size:12px;" placeholder="Stage name" value="${stg.name}" oninput="updateStageName(true, ${i}, this.value)" />
+        <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ 0" value="${val}" oninput="updateStageCost(true, ${i}, this.value)" />
+        <button class="btn-del" style="padding:8px 10px;" onclick="removeStage(true, ${i})">🗑</button>
+      </div>`;
+    } else {
+      return `<div class="srow">
+        <div class="snum" style="background:${has?clr+'22':'#1e1e24'};border:1px solid ${has?clr+'55':'#2a2a30'};color:${has?clr:'#444'}">${i+1}</div>
+        <span class="sname" style="color:${has?'#ddd':'#666'}">${stg.name || 'Unnamed Stage'}</span>
+        <span class="sval" style="color:${has?clr:'#333'}">${has?'₹'+fmt(val):'—'}</span>
+      </div>`;
+    }
+  }).join('');
+
+  return`<div class="header">
+    <button class="back-btn" onclick="goList()">←</button>
+    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title" style="font-size:14px">${d.name}</div></div>
+    <div style="display:flex;gap:8px">
+      ${editMode
+        ?`<button class="btn-cancel" onclick="cancelEdit()">Cancel</button><button class="btn-save" onclick="saveEdit()">Save</button>`
+        :`<button class="btn-edit" onclick="startEdit()">✏️ Edit</button><button class="btn-del" onclick="showDel()">🗑</button>`}
+    </div>
+  </div>
+  <div class="content" style="padding-top:16px">
+    <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px">${d.date}</div>
+    ${profitCardHTML(d.stages,d.sellingPrice,d.qty)}
+    <div class="card">
+      <div class="clbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>STAGES & COSTS</span>
+        ${editMode ? `<button class="btn-edit" onclick="addStage(true)">+ Add Stage</button>` : ''}
+      </div>
+      <div class="prog">${progBars(d.stages)}</div>
+      <div class="prog-lbl" style="margin-bottom:12px">${stagesFilled(d.stages)}/${totalStages(d.stages)} stages recorded</div>
+      ${stagesHTML}
+      <div class="total-row"><span class="total-lbl">TOTAL COST</span><span class="total-val">₹${fmt(cost)}</span></div>
+    </div>
+    <div class="card">
+      <div class="clbl">SELLING & QUANTITY</div>
+      <div class="flex2">
+        <div>
+          <label class="lbl">SELLING PRICE</label>
+          ${editMode?`<input class="inp" type="number" value="${d.sellingPrice}" placeholder="0" oninput="dr_set('sellingPrice',this.value)"/>`
+            :`<div class="price-static" style="color:#f59e0b">${d.sellingPrice?'₹'+fmt(d.sellingPrice):'—'}</div>`}
+        </div>
+        <div>
+          <label class="lbl">TOTAL QTY (pcs)</label>
+          ${editMode?`<input class="inp" type="number" value="${d.qty}" placeholder="0" oninput="dr_set('qty',this.value)"/>`
+            :`<div class="price-static" style="color:#aaa">${d.qty?fmt(d.qty)+' pcs':'—'}</div>`}
+        </div>
+      </div>
+    </div>
+    ${(editMode||d.notes)?`<div class="card"><div class="clbl">NOTES</div>
+      ${editMode?`<textarea class="inp" rows="3" placeholder="Any notes..." oninput="dr_set('notes',this.value)">${d.notes||''}</textarea>`
+        :`<p style="font-size:14px;color:#aaa;line-height:1.6">${d.notes}</p>`}
+    </div>`:''}
+  </div>
+  ${delConf?`<div class="overlay" onclick="hideDel()">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <h3>Delete Batch?</h3>
+      <p>"${d.name}" will be permanently deleted.</p>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="hideDel()">Cancel</button>
+        <button class="btn-del-confirm" onclick="deleteBatch()">Delete</button>
+      </div>
+    </div>
+  </div>`:''}`;
+}
+
+// Actions
+function goList(){view='list';selId=null;editMode=false;draft=null;delConf=false;render();}
+function goNew(){
+  newB={name:'',date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit'}),qty:'',stages:[],sellingPrice:'',notes:''};
+  view='new';render();
+}
+function openDetail(id){selId=id;editMode=false;draft=null;view='detail';render();}
+function startEdit(){const b=batches.find(x=>x.id===selId);draft={...b,stages:JSON.parse(JSON.stringify(b.stages))};editMode=true;render();}
+function cancelEdit(){editMode=false;draft=null;render();}
+async function saveEdit(){
+  try {
+    const { error } = await sbClient.from('batches').update(draft).eq('id', draft.id);
+    if (error) throw error;
+    batches=batches.map(b=>b.id===selId?{...draft}:b);
+    editMode=false;draft=null;render();
+  } catch (err) {
+    console.error('Error saving edit:', err);
+    alert('Failed to save to database. Check console for details.');
+  }
+}
+function showDel(){delConf=true;render();}
+function hideDel(){delConf=false;render();}
+async function deleteBatch(){
+  try {
+    const { error } = await sbClient.from('batches').delete().eq('id', selId);
+    if (error) throw error;
+    batches=batches.filter(b=>b.id!==selId);
+    view='list';selId=null;delConf=false;render();
+  } catch (err) {
+    console.error('Error deleting:', err);
+    alert('Failed to delete from database. Check console for details.');
+  }
+}
+
+function nd_set(k,v){if(newB)newB[k]=v;}
+function dr_set(k,v){if(draft)draft[k]=v;}
+
+function addStage(isDraft) {
+  const target = isDraft ? draft : newB;
+  if (!target.stages) target.stages = [];
+  target.stages.push({ name: '', cost: '' });
+  render();
+}
+function removeStage(isDraft, idx) {
+  const target = isDraft ? draft : newB;
+  target.stages.splice(idx, 1);
+  render();
+}
+function updateStageName(isDraft, idx, val) {
+  const target = isDraft ? draft : newB;
+  target.stages[idx].name = val;
+}
+function updateStageCost(isDraft, idx, val) {
+  const target = isDraft ? draft : newB;
+  target.stages[idx].cost = val;
+}
+
+async function createBatch(){
+  if(!newB||!newB.name.trim()){alert('Enter order name');return;}
+  const newBatch = {...newB,id:Date.now(),stages:JSON.parse(JSON.stringify(newB.stages))};
+  
+  try {
+    const { error } = await sbClient.from('batches').insert([newBatch]);
+    if (error) throw error;
+    batches=[newBatch,...batches];
+    view='list';render();
+  } catch (err) {
+    console.error('Error creating batch:', err);
+    alert('Failed to save to database. Check console for details.');
+  }
+}
+
+function render(){
+  let html='';
+  if(view==='list')html=renderList();
+  else if(view==='new')html=renderNew();
+  else if(view==='detail')html=renderDetail();
+  document.getElementById('app').innerHTML=html;
+}
+
+render();
+loadData();
+
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
