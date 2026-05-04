@@ -104,7 +104,34 @@
     }
 
     .content {
-      padding: 0 16px 50px;
+      padding: 0 16px 70px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #000000;
+      border-top: 1px solid #222222;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+
+    .nav-item {
+      color: #aaa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10px;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: #f97316;
     }
 
     .stats {
@@ -566,6 +593,8 @@
   <div id="app"></div>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="graph.js"></script>
   <script>
     // --- SUPABASE CONFIGURATION ---
     // 1. Replace these with your actual Supabase project URL and Anon Key
@@ -580,12 +609,16 @@
     function sfmt(n) { n = parseFloat(n); if (isNaN(n)) return '0'; return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : fmt(n); }
     function parseDateObj(s) {
       if (!s) return new Date(NaN);
-      if (s.includes('-')) return new Date(s);
+      if (s.includes('-')) {
+        const p = s.split('-');
+        if (p.length === 3) return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+        return new Date(s);
+      }
       const parts = s.split('/');
       if (parts.length === 3) {
         let [d, m, y] = parts;
         if (y.length === 2) y = '20' + y;
-        return new Date(`${y}-${m}-${d}`);
+        return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
       }
       return new Date(NaN);
     }
@@ -608,7 +641,7 @@
       if (end) {
         const d2 = parseDateObj(end);
         if (!isNaN(d2)) {
-          const days = Math.max(0, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)));
+          const days = Math.max(0, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
           if (isDetail) return `<span style="color:#10b981;font-weight:bold;">TOOK ${days} DAYS TO COMPLETE</span>`;
           return `<span style="margin-left:8px;background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:4px;color:#10b981;font-weight:bold;font-size:10px;">Took ${days} Days</span>`;
         }
@@ -616,7 +649,7 @@
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const diff = Math.max(0, Math.floor((today - d1) / (1000 * 60 * 60 * 24)));
+      const diff = Math.max(0, Math.round((today - d1) / (1000 * 60 * 60 * 24)));
       if (isDetail) return `<span style="color:#f59e0b;font-weight:bold;">RUNNING DAY ${diff + 1}</span>`;
       return `<span style="margin-left:8px;background:rgba(245,158,11,0.15);padding:2px 6px;border-radius:4px;color:#f59e0b;font-weight:bold;font-size:10px;">Running Day ${diff + 1}</span>`;
     }
@@ -1009,9 +1042,29 @@
       else if (view === 'list') html = renderList();
       else if (view === 'new') html = renderNew();
       else if (view === 'detail') html = renderDetail();
+      else if (view === 'graph') html = typeof renderGraphView === 'function' ? renderGraphView(batches) : '<div class="empty">Loading...</div>';
+      
+      if (auth && (view === 'list' || view === 'graph')) {
+        html += `
+          <div class="bottom-nav">
+            <div class="nav-item ${view === 'list' ? 'active' : ''}" onclick="view='list';render()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Batches</span>
+            </div>
+            <div class="nav-item ${view === 'graph' ? 'active' : ''}" onclick="view='graph';render()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              <span>Analytics</span>
+            </div>
+          </div>
+        `;
+      }
+      
       document.getElementById('app').innerHTML = html;
       
       setTimeout(() => {
+        if (view === 'graph' && typeof initCharts === 'function') {
+          initCharts(batches);
+        }
         flatpickr('.fp-date', {
           dateFormat: "Y-m-d",
           disableMobile: true,
