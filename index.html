@@ -1156,6 +1156,57 @@
       }
     }
 
+    function renderProfitEngine() {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      
+      const getProfit = (daysStart, daysEnd) => {
+        const dStart = new Date(today); dStart.setDate(dStart.getDate() - daysStart);
+        const dEnd = new Date(today); dEnd.setDate(dEnd.getDate() - daysEnd);
+        return batches.filter(b => {
+          if (!b.sellingDate || !b.sellingPrice) return false;
+          const d = parseDateObj(b.sellingDate);
+          return !isNaN(d) && d >= dStart && d < dEnd;
+        }).reduce((s, b) => { 
+          const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); 
+          return s + (sp - c); 
+        }, 0);
+      };
+
+      const p7 = getProfit(7, 0);
+      const p7p = getProfit(14, 7);
+      const p30 = getProfit(30, 0);
+      const p30p = getProfit(60, 30);
+
+      const calcG = (c, p) => p === 0 ? (c > 0 ? '+100.0%' : (c < 0 ? '-100.0%' : '0.0%')) : ((c - p) / Math.abs(p) * 100).toFixed(1) + '%';
+      const wow = calcG(p7, p7p);
+      const mom = calcG(p30, p30p);
+
+      const wowIsP = parseFloat(wow) >= 0;
+      const momIsP = parseFloat(mom) >= 0;
+
+      return `<div class="header">
+    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Profit Engine</div></div>
+  </div>
+  <div class="content" style="padding-top:16px;">
+    <div class="card">
+      <div class="clbl" style="font-size:12px;margin-bottom:16px;color:#f59e0b;">PROFIT TREND</div>
+      <div class="flex2" style="margin-bottom:16px;">
+        <div style="background:#111;padding:16px;border-radius:10px;border:1px solid #222;">
+          <div style="font-family:monospace;font-size:10px;color:#888;margin-bottom:8px;">WOW GROWTH</div>
+          <div style="font-weight:700;font-size:22px;color:${wowIsP ? '#10b981' : '#ef4444'};">${wowIsP ? '+' : ''}${wow}</div>
+          <div style="font-family:monospace;font-size:10px;color:#555;margin-top:6px;">vs Last Week</div>
+        </div>
+        <div style="background:#111;padding:16px;border-radius:10px;border:1px solid #222;">
+          <div style="font-family:monospace;font-size:10px;color:#888;margin-bottom:8px;">MOM GROWTH</div>
+          <div style="font-weight:700;font-size:22px;color:${momIsP ? '#10b981' : '#ef4444'};">${momIsP ? '+' : ''}${mom}</div>
+          <div style="font-family:monospace;font-size:10px;color:#555;margin-top:6px;">vs Last Month</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+    }
+
     function render() {
       let html = '';
       if (!auth) html = renderLogin();
@@ -1163,8 +1214,9 @@
       else if (view === 'new') html = renderNew();
       else if (view === 'detail') html = renderDetail();
       else if (view === 'graph') html = typeof renderGraphView === 'function' ? renderGraphView(batches) : '<div class="empty">Loading...</div>';
+      else if (view === 'profit_engine') html = renderProfitEngine();
       
-      if (auth && (view === 'list' || view === 'graph')) {
+      if (auth && (view === 'list' || view === 'graph' || view === 'profit_engine')) {
         html += `
           <div class="bottom-nav">
             <div class="nav-item ${view === 'list' ? 'active' : ''}" onclick="view='list';render()">
@@ -1174,6 +1226,10 @@
             <div class="nav-item ${view === 'graph' ? 'active' : ''}" onclick="view='graph';render()">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
               <span>Analytics</span>
+            </div>
+            <div class="nav-item ${view === 'profit_engine' ? 'active' : ''}" onclick="view='profit_engine';render()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              <span>Profit Engine</span>
             </div>
           </div>
         `;
