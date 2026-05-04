@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ranil-tracker-v8';
+const CACHE_NAME = 'ranil-tracker-v12';
 const ASSETS = [
   './',
   './index.html',

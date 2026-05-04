@@ -772,6 +772,7 @@
       const spend = batches.reduce((s, b) => s + totalCost(b.stages), 0);
       const pb = batches.filter(b => b.sellingPrice && totalCost(b.stages));
       const avg = pb.length ? pb.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + ((sp - c) / c * 100); }, 0) / pb.length : 0;
+      const allNetProfit = pb.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + (sp - c); }, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const thirtyDaysAgo = new Date(today);
@@ -796,6 +797,13 @@
       }
       const avgDailyProfit30 = netProfit30 / activeDays;
 
+      const all30 = batches.filter(b => {
+        const d = parseDateObj(b.date);
+        return !isNaN(d) && d >= thirtyDaysAgo;
+      });
+      const spend30 = all30.reduce((s, b) => s + totalCost(b.stages), 0);
+      const avg30 = pb30.length ? pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + ((sp - c) / c * 100); }, 0) / pb30.length : 0;
+
       const cards = batches.length === 0 ? `<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>` :
         batches.map(b => {
           const cost = totalCost(b.stages); const sell = parseFloat(b.sellingPrice);
@@ -816,13 +824,23 @@
     <button class="new-btn" onclick="goNew()">+ New Batch</button>
   </div>
   <div class="content">
-    <div class="stats">
+    <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LIFETIME STATS</div>
+    <div class="stats" style="margin-bottom:24px;">
       <div class="stat"><div class="stat-lbl">BATCHES</div><div class="stat-val" style="color:#f59e0b">${total}</div></div>
       <div class="stat"><div class="stat-lbl">TOTAL SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend)}</div></div>
-      <div class="stat"><div class="stat-lbl">AVG PROFIT</div><div class="stat-val" style="color:${avg >= 0 ? '#10b981' : '#ef4444'}">${avg.toFixed(1)}%</div></div>
-      <div class="stat"><div class="stat-lbl">30D NET PROFIT</div><div class="stat-val" style="color:${netProfit30 >= 0 ? '#10b981' : '#ef4444'}">${netProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(netProfit30))}</div></div>
-      <div class="stat" style="grid-column: 1 / -1;"><div class="stat-lbl">30D AVG DAILY PROFIT</div><div class="stat-val" style="color:${avgDailyProfit30 >= 0 ? '#10b981' : '#ef4444'}">${avgDailyProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(avgDailyProfit30))}</div></div>
+      <div class="stat"><div class="stat-lbl">AVG MARGIN</div><div class="stat-val" style="color:${avg >= 0 ? '#10b981' : '#ef4444'}">${avg.toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-lbl">TOTAL PROFIT</div><div class="stat-val" style="color:${allNetProfit >= 0 ? '#10b981' : '#ef4444'}">${allNetProfit >= 0 ? '+' : '-'}₹${sfmt(Math.abs(allNetProfit))}</div></div>
     </div>
+    
+    <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
+    <div class="stats" style="margin-bottom:24px;">
+      <div class="stat"><div class="stat-lbl">30D SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend30)}</div></div>
+      <div class="stat"><div class="stat-lbl">30D AVG MARGIN</div><div class="stat-val" style="color:${avg30 >= 0 ? '#10b981' : '#ef4444'}">${avg30.toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-lbl">30D NET PROFIT</div><div class="stat-val" style="color:${netProfit30 >= 0 ? '#10b981' : '#ef4444'}">${netProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(netProfit30))}</div></div>
+      <div class="stat"><div class="stat-lbl">DAILY AVG PROFIT</div><div class="stat-val" style="color:${avgDailyProfit30 >= 0 ? '#10b981' : '#ef4444'}">${avgDailyProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(avgDailyProfit30))}</div></div>
+    </div>
+
+    <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">RECENT BATCHES</div>
     ${cards}
   </div>`;
     }
@@ -1027,6 +1045,37 @@
         console.error('Error deleting:', err);
         alert('Failed to delete from database. Check console for details.');
       }
+    }
+
+    function exportCSV() {
+      const headers = ['ID', 'Name', 'Start Date', 'Completion Date', 'Quantity', 'Total Cost', 'Selling Price', 'Net Profit', 'Profit Margin (%)'];
+      const rows = batches.map(b => {
+        const cost = totalCost(b.stages);
+        const sell = parseFloat(b.sellingPrice) || 0;
+        const profit = sell - cost;
+        const margin = cost ? ((profit / cost) * 100).toFixed(2) : 0;
+        return [
+          b.id,
+          `"${(b.name || '').replace(/"/g, '""')}"`,
+          b.date || '',
+          b.sellingDate || '',
+          b.qty || '',
+          cost,
+          sell,
+          profit,
+          margin
+        ].join(',');
+      });
+      const csvContent = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ranil_batches_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function nd_set(k, v) { if (newB) newB[k] = v; }

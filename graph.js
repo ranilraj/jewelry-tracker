@@ -1,10 +1,12 @@
 function renderGraphView(batches) {
   return `
-    <div class="header" style="justify-content:center;">
+    <div class="header" style="justify-content:space-between; align-items:center;">
+      <div style="width:80px;"></div>
       <div style="display:flex; flex-direction:column; align-items:center;">
         <div class="brand">RANIL JEWELLERS</div>
         <div class="title">Analytics</div>
       </div>
+      <button class="btn-edit" style="width:80px; padding:6px 0; font-size:11px; color:#f97316; border-color:#f9731633; background:rgba(249,115,22,0.1);" onclick="exportCSV()">Export CSV</button>
     </div>
     <div class="content" style="padding-top:20px;">
       <div class="card" style="margin-bottom:20px;">
