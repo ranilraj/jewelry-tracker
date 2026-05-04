@@ -233,7 +233,7 @@ function renderList(){
       const cost=totalCost(b.stages);const sell=parseFloat(b.sellingPrice);
       return`<div class="bcard" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div class="bname">${b.name}</div><div class="bdate">${b.date}${calcDays(b.date, b.sellingDate) !== null ? `<span style="margin-left:8px;background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;color:#aaa">${calcDays(b.date, b.sellingDate)} days</span>` : ''}</div></div>
+          <div><div class="bname">${b.name}</div><div class="bdate">${b.date}${calcDays(b.date, b.sellingDate) !== null ? `<span style="margin-left:8px;background:rgba(245,158,11,0.15);padding:2px 6px;border-radius:4px;color:#f59e0b;font-weight:bold;">Took ${calcDays(b.date, b.sellingDate)} days</span>` : ''}</div></div>
           <div style="text-align:right">${badgeHTML(cost,sell)}${cost>0?`<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>`:''}
           </div>
         </div>
@@ -358,7 +358,7 @@ function renderDetail(){
   <div class="content" style="padding-top:16px">
     <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;">
       <span>START: ${d.date}</span>
-      ${calcDays(d.date, d.sellingDate) !== null ? `<span style="color:#f59e0b">${calcDays(d.date, d.sellingDate)} DAYS LATER</span>` : ''}
+      ${calcDays(d.date, d.sellingDate) !== null ? `<span style="color:#f59e0b;font-weight:bold;">TOOK ${calcDays(d.date, d.sellingDate)} DAYS TO COMPLETE</span>` : ''}
     </div>
     ${profitCardHTML(d.stages,d.sellingPrice,d.qty)}
     <div class="card">
