@@ -27,7 +27,7 @@ button{cursor:pointer;border:none;}
 .new-btn{margin-left:auto;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0d0d0f;font-weight:700;border-radius:10px;padding:9px 15px;font-size:13px;}
 .content{padding:0 16px 50px;}
 
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;}
 .stat{background:#16161a;border:1px solid #2a2a30;border-radius:12px;padding:14px 8px;text-align:center;}
 .stat-lbl{font-family:monospace;font-size:9px;color:#666;letter-spacing:1px;margin-bottom:5px;}
 .stat-val{font-family:monospace;font-weight:700;font-size:15px;}
@@ -241,6 +241,7 @@ function renderList(){
   const spend=batches.reduce((s,b)=>s+totalCost(b.stages),0);
   const pb=batches.filter(b=>b.sellingPrice&&totalCost(b.stages));
   const avg=pb.length?pb.reduce((s,b)=>{const c=totalCost(b.stages),sp=parseFloat(b.sellingPrice);return s+((sp-c)/c*100);},0)/pb.length:0;
+  const netProfit=pb.reduce((s,b)=>{const c=totalCost(b.stages),sp=parseFloat(b.sellingPrice);return s+(sp-c);},0);
 
   const cards=batches.length===0?`<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>`:
     batches.map(b=>{
@@ -266,6 +267,7 @@ function renderList(){
       <div class="stat"><div class="stat-lbl">BATCHES</div><div class="stat-val" style="color:#f59e0b">${total}</div></div>
       <div class="stat"><div class="stat-lbl">TOTAL SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend)}</div></div>
       <div class="stat"><div class="stat-lbl">AVG PROFIT</div><div class="stat-val" style="color:${avg>=0?'#10b981':'#ef4444'}">${avg.toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-lbl">NET PROFIT</div><div class="stat-val" style="color:${netProfit>=0?'#10b981':'#ef4444'}">${netProfit>=0?'+':'-'}₹${sfmt(Math.abs(netProfit))}</div></div>
     </div>
     ${cards}
   </div>`;
