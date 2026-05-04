@@ -113,12 +113,26 @@ const STAGE_COLORS = ['#f59e0b', '#f97316', '#10b981', '#6366f1', '#ec4899', '#f
 
 function fmt(n){return Number(n).toLocaleString('en-IN');}
 function sfmt(n){n=parseFloat(n);if(isNaN(n))return'0';return n>=1000?(n/1000).toFixed(1)+'k':fmt(n);}
-function calcDays(start, end) {
-  if (!start || !end) return null;
+function getDaysHTML(start, end, isDetail) {
+  if (!start) return '';
   const p = s => { const [d,m,y] = s.split('/'); return new Date(`20${y}-${m}-${d}`); };
-  const d1 = p(start); const d2 = p(end);
-  if (isNaN(d1) || isNaN(d2)) return null;
-  return Math.max(0, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)));
+  const d1 = p(start);
+  if (isNaN(d1)) return '';
+  
+  if (end) {
+    const d2 = p(end);
+    if (!isNaN(d2)) {
+      const days = Math.max(0, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)));
+      if (isDetail) return `<span style="color:#10b981;font-weight:bold;">TOOK ${days} DAYS TO COMPLETE</span>`;
+      return `<span style="margin-left:8px;background:rgba(16,185,129,0.15);padding:2px 6px;border-radius:4px;color:#10b981;font-weight:bold;">Took ${days} days</span>`;
+    }
+  }
+  
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diff = Math.max(0, Math.floor((today - d1) / (1000 * 60 * 60 * 24)));
+  if (isDetail) return `<span style="color:#f59e0b;font-weight:bold;">RUNNING DAY ${diff + 1}</span>`;
+  return `<span style="margin-left:8px;background:rgba(245,158,11,0.15);padding:2px 6px;border-radius:4px;color:#f59e0b;font-weight:bold;">Day ${diff + 1}</span>`;
 }
 function totalCost(st){
   if(!Array.isArray(st)) return 0;
@@ -233,7 +247,7 @@ function renderList(){
       const cost=totalCost(b.stages);const sell=parseFloat(b.sellingPrice);
       return`<div class="bcard" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div class="bname">${b.name}</div><div class="bdate">${b.date}${calcDays(b.date, b.sellingDate) !== null ? `<span style="margin-left:8px;background:rgba(245,158,11,0.15);padding:2px 6px;border-radius:4px;color:#f59e0b;font-weight:bold;">Took ${calcDays(b.date, b.sellingDate)} days</span>` : ''}</div></div>
+          <div><div class="bname">${b.name}</div><div class="bdate">${b.date}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost,sell)}${cost>0?`<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>`:''}
           </div>
         </div>
@@ -358,7 +372,7 @@ function renderDetail(){
   <div class="content" style="padding-top:16px">
     <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;">
       <span>START: ${d.date}</span>
-      ${calcDays(d.date, d.sellingDate) !== null ? `<span style="color:#f59e0b;font-weight:bold;">TOOK ${calcDays(d.date, d.sellingDate)} DAYS TO COMPLETE</span>` : ''}
+      ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
     ${profitCardHTML(d.stages,d.sellingPrice,d.qty)}
     <div class="card">
