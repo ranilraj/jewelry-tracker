@@ -54,6 +54,9 @@ function initCharts(batches) {
     return isNaN(revenue) ? 0 : (revenue - cost);
   });
 
+  const avg5 = data5.length ? data5.reduce((a, b) => a + b, 0) / data5.length : 0;
+  const avgData5 = data5.map(() => avg5);
+
   const ctxBatch = document.getElementById('batchChart');
   if (ctxBatch) {
     if (batchChartInstance) batchChartInstance.destroy();
@@ -61,15 +64,32 @@ function initCharts(batches) {
       type: 'bar',
       data: {
         labels: labels5.length ? labels5 : ['No Data'],
-        datasets: [{
-          label: 'Net Profit (₹)',
-          data: data5.length ? data5 : [0],
-          backgroundColor: '#f97316',
-          borderRadius: 4
-        }]
+        datasets: [
+          {
+            type: 'line',
+            label: 'Average',
+            data: avgData5.length ? avgData5 : [0],
+            borderColor: '#10b981',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            fill: false
+          },
+          {
+            label: 'Net Profit (₹)',
+            data: data5.length ? data5 : [0],
+            backgroundColor: '#f97316',
+            borderRadius: 4
+          }
+        ]
       },
       options: {
         responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         scales: {
           y: { grid: { color: '#222222' }, ticks: { color: '#666' } },
           x: { grid: { display: false }, ticks: { color: '#666', font: { size: 10 } } }
@@ -97,6 +117,9 @@ function initCharts(batches) {
   const mLabels = Object.keys(monthlyData);
   const mData = Object.values(monthlyData);
 
+  const mAvg = mData.length ? mData.reduce((a, b) => a + b, 0) / mData.length : 0;
+  const avgMData = mData.map(() => mAvg);
+
   const ctxMonthly = document.getElementById('monthlyChart');
   if (ctxMonthly) {
     if (monthlyChartInstance) monthlyChartInstance.destroy();
@@ -104,15 +127,32 @@ function initCharts(batches) {
       type: 'bar',
       data: {
         labels: mLabels.length ? mLabels : ['No Data'],
-        datasets: [{
-          label: 'Total Profit (₹)',
-          data: mData.length ? mData : [0],
-          backgroundColor: '#f59e0b',
-          borderRadius: 4
-        }]
+        datasets: [
+          {
+            type: 'line',
+            label: 'Average',
+            data: avgMData.length ? avgMData : [0],
+            borderColor: '#10b981',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            fill: false
+          },
+          {
+            label: 'Total Profit (₹)',
+            data: mData.length ? mData : [0],
+            backgroundColor: '#f59e0b',
+            borderRadius: 4
+          }
+        ]
       },
       options: {
         responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         scales: {
           y: { grid: { color: '#222222' }, ticks: { color: '#666' } },
           x: { grid: { display: false }, ticks: { color: '#666', font: { size: 10 } } }

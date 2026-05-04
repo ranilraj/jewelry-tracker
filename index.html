@@ -284,6 +284,18 @@
       border-color: #f59e0b;
     }
 
+    .header-date-inp {
+      padding: 4px 8px !important;
+      font-size: 11px !important;
+    }
+
+    .stage-date-inp {
+      flex: 1 !important;
+      padding: 6px 10px !important;
+      font-size: 12px !important;
+      text-align: left !important;
+    }
+
     /* Flatpickr Orange & Black Theme */
     .flatpickr-calendar {
       background: #111111 !important;
@@ -760,7 +772,29 @@
       const spend = batches.reduce((s, b) => s + totalCost(b.stages), 0);
       const pb = batches.filter(b => b.sellingPrice && totalCost(b.stages));
       const avg = pb.length ? pb.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + ((sp - c) / c * 100); }, 0) / pb.length : 0;
-      const netProfit = pb.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + (sp - c); }, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const pb30 = pb.filter(b => {
+        const d = parseDateObj(b.sellingDate || b.date);
+        return !isNaN(d) && d >= thirtyDaysAgo;
+      });
+      const netProfit30 = pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + (sp - c); }, 0);
+      let activeDays = 30;
+      if (pb30.length > 0) {
+        let earliest = today;
+        pb30.forEach(b => {
+          const d = parseDateObj(b.date);
+          if (!isNaN(d) && d < earliest) earliest = d;
+        });
+        activeDays = Math.round((today - earliest) / (1000 * 60 * 60 * 24));
+        if (activeDays > 30) activeDays = 30;
+        if (activeDays < 1) activeDays = 1;
+      } else {
+        activeDays = 1;
+      }
+      const avgDailyProfit30 = netProfit30 / activeDays;
 
       const cards = batches.length === 0 ? `<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>` :
         batches.map(b => {
@@ -786,7 +820,8 @@
       <div class="stat"><div class="stat-lbl">BATCHES</div><div class="stat-val" style="color:#f59e0b">${total}</div></div>
       <div class="stat"><div class="stat-lbl">TOTAL SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend)}</div></div>
       <div class="stat"><div class="stat-lbl">AVG PROFIT</div><div class="stat-val" style="color:${avg >= 0 ? '#10b981' : '#ef4444'}">${avg.toFixed(1)}%</div></div>
-      <div class="stat"><div class="stat-lbl">NET PROFIT</div><div class="stat-val" style="color:${netProfit >= 0 ? '#10b981' : '#ef4444'}">${netProfit >= 0 ? '+' : '-'}₹${sfmt(Math.abs(netProfit))}</div></div>
+      <div class="stat"><div class="stat-lbl">30D NET PROFIT</div><div class="stat-val" style="color:${netProfit30 >= 0 ? '#10b981' : '#ef4444'}">${netProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(netProfit30))}</div></div>
+      <div class="stat" style="grid-column: 1 / -1;"><div class="stat-lbl">30D AVG DAILY PROFIT</div><div class="stat-val" style="color:${avgDailyProfit30 >= 0 ? '#10b981' : '#ef4444'}">${avgDailyProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(avgDailyProfit30))}</div></div>
     </div>
     ${cards}
   </div>`;
@@ -837,7 +872,7 @@
           </div>
           <div style="width:100%; display:flex; align-items:center; gap:8px; padding-left:16px;">
             <span style="font-size:11px; color:#666;">Date:</span>
-            <input class="inp-sm fp-date" type="text" data-placeholder="Date" placeholder="Date" style="flex:1; padding:6px 10px; font-size:12px; text-align:left;" value="${toInputDate(stg.date)}" oninput="updateStageDate(false, ${i}, this.value);" />
+            <input class="inp-sm fp-date stage-date-inp" type="text" data-placeholder="Date" placeholder="Date" value="${toInputDate(stg.date)}" oninput="updateStageDate(false, ${i}, this.value);" />
           </div>
         </div>`;
       }).join('')}
@@ -881,7 +916,7 @@
         </div>
         <div style="width:100%; display:flex; align-items:center; gap:8px; padding-left:16px;">
           <span style="font-size:11px; color:#666;">Date:</span>
-          <input class="inp-sm fp-date" type="text" data-placeholder="Date" placeholder="Date" style="flex:1; padding:6px 10px; font-size:12px; text-align:left;" value="${toInputDate(stg.date)}" oninput="updateStageDate(true, ${i}, this.value);" />
+          <input class="inp-sm fp-date stage-date-inp" type="text" data-placeholder="Date" placeholder="Date" value="${toInputDate(stg.date)}" oninput="updateStageDate(true, ${i}, this.value);" />
         </div>
       </div>`;
         } else {
@@ -908,7 +943,7 @@
   <div class="content" style="padding-top:16px">
     <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
       ${editMode 
-        ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date" data-placeholder="Start Date" placeholder="Start Date" style="padding:4px 8px;font-size:11px;" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
+        ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
         : `<span>START: ${fmtDateUI(d.date)}</span>`}
       ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
@@ -1067,6 +1102,8 @@
         }
         flatpickr('.fp-date', {
           dateFormat: "Y-m-d",
+          altInput: true,
+          altFormat: "d-m-Y",
           disableMobile: true,
           onChange: function(selectedDates, dateStr, instance) {
             instance.element.value = dateStr;
