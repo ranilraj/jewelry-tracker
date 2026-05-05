@@ -710,9 +710,14 @@
       else if (pct > 50 && pct <= 80) clr = '#f97316';
       else if (pct > 80) clr = '#10b981';
       
+      const tCost = totalCost(st);
+      const avgCost = (tCost > 0 && filled > 0) ? (tCost / filled) : 1;
+
       return st.map((stage, i) => {
         const h = stage.cost !== '' && stage.cost != null;
-        return `<div class="prog-bar" style="background:${h ? clr : 'rgba(255,255,255,0.08)'}"></div>`;
+        let flexVal = h ? (parseFloat(stage.cost) || 0) : avgCost;
+        if (flexVal <= 0) flexVal = avgCost * 0.05 || 1;
+        return `<div class="prog-bar" style="flex: ${flexVal}; background:${h ? clr : 'rgba(255,255,255,0.08)'}"></div>`;
       }).join('');
     }
     function pillsHTML(st) {
@@ -961,7 +966,9 @@
         <div style="width:100%; display:flex; align-items:center; gap:12px;">
           <div class="snum" style="background:${has ? clr + '22' : '#111111'};border:1px solid ${has ? clr + '55' : '#222222'};color:${has ? clr : '#444'}">${i + 1}</div>
           <span class="sname" style="color:${has ? '#ddd' : '#666'}">${stg.name || 'Unnamed Stage'}</span>
-          <span class="sval" style="color:${has ? clr : '#333'}">${has ? '₹' + fmt(val) : '—'}</span>
+          ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#aaa;font-size:12px;font-family:monospace;width:85px;text-align:left;">₹${(parseFloat(val)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : '<span style="width:85px;"></span>'}
+          ${(has && cost > 0) ? `<span style="color:#888;font-size:11px;font-family:monospace;width:45px;text-align:right;">${((parseFloat(val)/cost)*100).toFixed(1)}%</span>` : '<span style="width:45px;"></span>'}
+          <span class="sval" style="color:${has ? clr : '#333'};width:85px;text-align:right;margin-left:0;">${has ? '₹' + fmt(val) : '—'}</span>
         </div>
         ${stg.date ? `<div style="width:100%; padding-left:42px; font-size:10px; color:#888;">${fmtDateUI(stg.date)}</div>` : ''}
       </div>`;
