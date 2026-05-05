@@ -1027,8 +1027,8 @@
         } else {
           const viewEntriesHTML = entries.filter(e => e.cost !== '' && e.cost != null).map(ent => `
             <div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:monospace; margin-top:4px; color:#aaa;">
-              <div style="display:flex; align-items:center; gap:20px; font-weight:800; font-size:12px;">
-                ${ent.note ? `<span style="color:#666;font-style:italic;">${ent.note}</span>` : ''}
+              <div style="display:flex; align-items:center; font-weight:800; font-size:12px;">
+                <span style="color:#666; font-style:italic; width:110px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:10px;">${ent.note || '—'}</span>
                 <span>₹${fmt(ent.cost)}</span>
               </div>
               <span>${fmtDateUI(ent.date) || '—'}</span>
@@ -1043,7 +1043,7 @@
         </div>
         ${has ? `<div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:monospace; margin-top:4px; margin-bottom:4px;">
           <div style="display:flex; align-items:center;">
-            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px; letter-spacing:0.5px; margin-right:20px;">₹${(parseFloat(sCost)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : ''}
+            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px; letter-spacing:0.5px; width:110px; display:inline-block; margin-right:10px;">₹${(parseFloat(sCost)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : (has ? `<span style="width:110px; display:inline-block; margin-right:10px;"></span>` : '')}
             ${(has && cost > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px;">${((parseFloat(sCost)/cost)*100).toFixed(1)}%</span>` : ''}
           </div>
         </div>` : ''}
