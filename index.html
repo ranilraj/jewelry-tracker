@@ -1025,7 +1025,7 @@
             </div>
           `).join('');
 
-          return `<div class="srow" style="flex-wrap:wrap; gap:4px; align-items:flex-start; transition: background-color 0.2s; border-radius: 8px; padding: 11px 8px; margin: 0 -8px;" oncontextmenu="handleContext(event, ${i})" ontouchstart="startPress(event, ${i})" ontouchend="endPress(event)" ontouchcancel="endPress(event)">
+          return `<div class="srow" style="flex-wrap:wrap; gap:4px; align-items:flex-start; transition: background-color 0.2s; border-radius: 8px; padding: 11px 8px; margin: 0 -8px;" oncontextmenu="handleContext(event, ${i})" ontouchstart="startPress(event, ${i})" ontouchend="endPress(event)" ontouchcancel="endPress(event)" ontouchmove="endPress(event)">
         <div style="width:100%; display:flex; align-items:center; gap:12px;">
           <div class="snum" style="background:${has ? clr + '22' : '#111111'};border:1px solid ${has ? clr + '55' : '#222222'};color:${has ? clr : '#444'}">${i + 1}</div>
           <span class="sname" style="color:${has ? '#ddd' : '#666'}; font-weight:bold;">${stg.name || 'Unnamed Stage'}</span>
