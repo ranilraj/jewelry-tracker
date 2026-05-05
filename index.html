@@ -742,7 +742,11 @@
       const profit = sell - cost; const pct = (profit / cost * 100); const isP = profit >= 0;
       const clr = isP ? '#10b981' : '#ef4444';
       let qrow = '';
-      if (parseFloat(qty) > 0) qrow = `<div class="prow"><span class="prow-lbl">Cost per piece (${fmt(qty)} pcs)</span><span class="prow-val-sm">₹${(cost / parseFloat(qty)).toFixed(2)}</span></div>`;
+      let profPerPcHTML = '';
+      if (parseFloat(qty) > 0) {
+        qrow = `<div class="prow"><span class="prow-lbl">Cost per piece (${fmt(qty)} pcs)</span><span class="prow-val-sm">₹${(cost / parseFloat(qty)).toFixed(2)}</span></div>`;
+        profPerPcHTML = `<span style="color:#aaa;font-size:12px;font-family:monospace;margin-right:12px;">${isP ? '+' : '−'}₹${(Math.abs(profit) / parseFloat(qty)).toFixed(2)}/pc</span>`;
+      }
       return `<div class="profit-card" style="background:${isP ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'};border:1px solid ${isP ? '#10b98133' : '#ef444433'}">
     <div class="pgrid">
       <div><div class="plbl">TOTAL COST</div><div class="pval" style="color:#aaa">₹${fmt(cost)}</div></div>
@@ -750,7 +754,7 @@
       <div><div class="plbl">PROFIT %</div><div class="pval" style="color:${clr}">${isP ? '+' : ''}${pct.toFixed(1)}%</div></div>
     </div>
     <div class="pdiv">
-      <div class="prow"><span class="prow-lbl">Net ${isP ? 'Profit' : 'Loss'}</span><span class="prow-val" style="color:${clr}">${isP ? '+' : '−'}₹${fmt(Math.abs(profit))}</span></div>
+      <div class="prow"><span class="prow-lbl">Net ${isP ? 'Profit' : 'Loss'}</span><div style="display:flex;align-items:center;">${profPerPcHTML}<span class="prow-val" style="color:${clr}">${isP ? '+' : '−'}₹${fmt(Math.abs(profit))}</span></div></div>
       ${qrow}
     </div>
   </div>`;
@@ -966,11 +970,15 @@
         <div style="width:100%; display:flex; align-items:center; gap:12px;">
           <div class="snum" style="background:${has ? clr + '22' : '#111111'};border:1px solid ${has ? clr + '55' : '#222222'};color:${has ? clr : '#444'}">${i + 1}</div>
           <span class="sname" style="color:${has ? '#ddd' : '#666'}">${stg.name || 'Unnamed Stage'}</span>
-          ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#aaa;font-size:12px;font-family:monospace;width:85px;text-align:left;">₹${(parseFloat(val)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : '<span style="width:85px;"></span>'}
-          ${(has && cost > 0) ? `<span style="color:#888;font-size:11px;font-family:monospace;width:45px;text-align:right;">${((parseFloat(val)/cost)*100).toFixed(1)}%</span>` : '<span style="width:45px;"></span>'}
-          <span class="sval" style="color:${has ? clr : '#333'};width:85px;text-align:right;margin-left:0;">${has ? '₹' + fmt(val) : '—'}</span>
+          <span class="sval" style="color:${has ? clr : '#333'}">${has ? '₹' + fmt(val) : '—'}</span>
         </div>
-        ${stg.date ? `<div style="width:100%; padding-left:42px; font-size:10px; color:#888;">${fmtDateUI(stg.date)}</div>` : ''}
+        ${(has || stg.date) ? `<div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:monospace; color:#888; margin-top:4px;">
+          <div style="display:flex; gap:12px;">
+            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#aaa;">₹${(parseFloat(val)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : ''}
+            ${(has && cost > 0) ? `<span>${((parseFloat(val)/cost)*100).toFixed(1)}%</span>` : ''}
+          </div>
+          ${stg.date ? `<div>${fmtDateUI(stg.date)}</div>` : ''}
+        </div>` : ''}
       </div>`;
         }
       }).join('');
