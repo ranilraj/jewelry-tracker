@@ -701,9 +701,17 @@
 
     function progBars(st) {
       if (!Array.isArray(st)) return '';
+      const total = st.length;
+      if (total === 0) return '';
+      const filled = st.filter(s => s.cost !== '' && s.cost != null).length;
+      const pct = (filled / total) * 100;
+      let clr = '#38bdf8';
+      if (pct > 20 && pct <= 50) clr = '#3b82f6';
+      else if (pct > 50 && pct <= 80) clr = '#f97316';
+      else if (pct > 80) clr = '#10b981';
+      
       return st.map((stage, i) => {
         const h = stage.cost !== '' && stage.cost != null;
-        const clr = STAGE_COLORS[i % STAGE_COLORS.length];
         return `<div class="prog-bar" style="background:${h ? clr : 'rgba(255,255,255,0.08)'}"></div>`;
       }).join('');
     }
@@ -814,10 +822,11 @@
         filteredBatches.map(b => {
           const cost = totalCost(b.stages); const sell = parseFloat(b.sellingPrice);
           const isCompleted = b.sellingDate && b.sellingPrice;
+          const profitAmtHTML = (cost > 0 && sell > 0 && !isNaN(sell)) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#ef4444'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div class="bname"><span style="color:#aaa;font-size:12px;margin-right:6px">#${b.id}</span>${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
-          <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
+          <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
         <div class="pills">${pillsHTML(b.stages)}</div>
@@ -961,7 +970,7 @@
 
       return `<div class="header">
     <button class="back-btn" onclick="goList()">←</button>
-    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title" style="font-size:14px"><span style="color:#aaa;font-size:12px;margin-right:6px">#${d.id}</span>${d.name}</div></div>
+    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title" style="font-size:14px"><span style="color:#aaa;font-size:12px;margin-right:6px">#${d.id}</span></div></div>
     <div style="display:flex;gap:8px">
       ${editMode
           ? `<button class="btn-cancel" onclick="cancelEdit()">Cancel</button><button class="btn-save" onclick="saveEdit()">Save</button>`
@@ -969,6 +978,16 @@
     </div>
   </div>
   <div class="content" style="padding-top:16px">
+    ${editMode ? `
+    <div class="card">
+      <label class="lbl">ORDER NAME</label>
+      <input class="inp" placeholder="Order Name" value="${d.name}" oninput="dr_set('name',this.value)"/>
+    </div>
+    ` : `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:18px;font-weight:700;">${d.name}</div>
+    </div>
+    `}
     <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
       ${editMode 
         ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
@@ -1099,10 +1118,11 @@
         filteredBatches.map(b => {
           const cost = totalCost(b.stages); const sell = parseFloat(b.sellingPrice);
           const isCompleted = b.sellingDate && b.sellingPrice;
+          const profitAmtHTML = (cost > 0 && sell > 0 && !isNaN(sell)) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#ef4444'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div class="bname"><span style="color:#aaa;font-size:12px;margin-right:6px">#${b.id}</span>${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
-          <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
+          <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
         <div class="pills">${pillsHTML(b.stages)}</div>
