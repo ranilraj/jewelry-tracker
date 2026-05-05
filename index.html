@@ -969,15 +969,15 @@
           return `<div class="srow" style="flex-wrap:wrap; gap:4px;">
         <div style="width:100%; display:flex; align-items:center; gap:12px;">
           <div class="snum" style="background:${has ? clr + '22' : '#111111'};border:1px solid ${has ? clr + '55' : '#222222'};color:${has ? clr : '#444'}">${i + 1}</div>
-          <span class="sname" style="color:${has ? '#ddd' : '#666'}">${stg.name || 'Unnamed Stage'}</span>
+          <span class="sname" style="color:${has ? '#ddd' : '#666'}; font-weight:bold;">${stg.name || 'Unnamed Stage'}</span>
           <span class="sval" style="color:${has ? clr : '#333'}">${has ? '₹' + fmt(val) : '—'}</span>
         </div>
-        ${(has || stg.date) ? `<div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:monospace; color:#888; margin-top:4px;">
-          <div style="display:flex; gap:12px;">
-            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#aaa;">₹${(parseFloat(val)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : ''}
-            ${(has && cost > 0) ? `<span>${((parseFloat(val)/cost)*100).toFixed(1)}%</span>` : ''}
+        ${(has || stg.date) ? `<div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:monospace; margin-top:4px;">
+          <div style="display:flex; align-items:center;">
+            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:bold; width:100px; display:inline-block; letter-spacing:0.5px;">₹${(parseFloat(val)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : (has ? `<span style="width:100px; display:inline-block;"></span>` : '')}
+            ${(has && cost > 0) ? `<span style="color:#3b82f6; font-weight:bold; width:55px; text-align:center; display:inline-block;">${((parseFloat(val)/cost)*100).toFixed(1)}%</span>` : ''}
           </div>
-          ${stg.date ? `<div>${fmtDateUI(stg.date)}</div>` : ''}
+          ${stg.date ? `<div style="color:#888;">${fmtDateUI(stg.date)}</div>` : ''}
         </div>` : ''}
       </div>`;
         }
