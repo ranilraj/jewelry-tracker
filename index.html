@@ -42,7 +42,17 @@
     }
 
     input,
-    textarea,
+    textarea {
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      text-align: right;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      text-align: right;
+    }
+
     button {
       font-family: 'DM Sans', sans-serif;
       outline: none;
@@ -261,7 +271,7 @@
       padding: 10px 14px;
       font-size: 14px;
       width: 100%;
-      text-align: right;
+      text-align: right !important;
       transition: border-color .2s;
     }
 
@@ -277,7 +287,7 @@
       padding: 9px 12px;
       font-size: 13px;
       width: 140px;
-      text-align: right;
+      text-align: right !important;
       transition: border-color .2s;
     }
 
