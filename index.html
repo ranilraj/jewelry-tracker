@@ -695,6 +695,7 @@
     let searchQuery = '';
     let quickAddStageIdx = null;
     let longPressTimer = null;
+    let isSaving = false;
 
     async function loadData() {
       try {
@@ -980,7 +981,7 @@
     </div>
     <div class="btn-row">
       <button class="btn-ghost" onclick="goList()">Cancel</button>
-      <button class="btn-gold" onclick="createBatch()">Create Batch</button>
+      <button class="btn-gold" onclick="createBatch()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Create Batch'}</button>
     </div>
   </div>`;
     }
@@ -1047,7 +1048,7 @@
     <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title" style="font-size:14px"><span style="color:#aaa;font-size:12px;margin-right:6px">#${d.id}</span></div></div>
     <div style="display:flex;gap:8px">
       ${editMode
-          ? `<button class="btn-cancel" onclick="cancelEdit()">Cancel</button><button class="btn-save" onclick="saveEdit()">Save</button>`
+          ? `<button class="btn-cancel" onclick="cancelEdit()">Cancel</button><button class="btn-save" onclick="saveEdit()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>`
           : `<button class="btn-edit" onclick="startEdit()">✏️ Edit</button><button class="btn-del" onclick="showDel()">🗑</button>`}
     </div>
   </div>
@@ -1126,7 +1127,7 @@
       </div>
       <div class="btn-row">
         <button class="btn-ghost" onclick="cancelQuickAdd()">Cancel</button>
-        <button class="btn-gold" onclick="saveQuickAdd()">Save Amount</button>
+        <button class="btn-gold" onclick="saveQuickAdd()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Save Amount'}</button>
       </div>
     </div>
   </div>`: ''}`;
@@ -1142,7 +1143,9 @@
     function startEdit() { const b = batches.find(x => x.id === selId); draft = { ...b, stages: JSON.parse(JSON.stringify(b.stages)) }; editMode = true; render(); }
     function cancelEdit() { editMode = false; draft = null; render(); }
     async function saveEdit() {
+      if (isSaving) return;
       try {
+        isSaving = true;
         const { error } = await sbClient.from('batches').update(draft).eq('id', draft.id);
         if (error) throw error;
         batches = batches.map(b => b.id === selId ? { ...draft } : b);
@@ -1150,6 +1153,8 @@
       } catch (err) {
         console.error('Error saving edit:', err);
         alert('Failed to save to database. Check console for details.');
+      } finally {
+        isSaving = false;
       }
     }
     function showDel() { delConf = true; render(); }
@@ -1308,6 +1313,7 @@
       render();
     }
     async function saveQuickAdd() {
+      if (isSaving) return;
       const amt = document.getElementById('qa_amt').value;
       const dt = document.getElementById('qa_date').value;
       if (!amt) { alert('Enter amount'); return; }
@@ -1323,6 +1329,7 @@
       updatedB.stages[quickAddStageIdx].entries.push({ cost: amt, date: dt });
       
       try {
+        isSaving = true;
         const { error } = await sbClient.from('batches').update(updatedB).eq('id', updatedB.id);
         if (error) throw error;
         batches = batches.map(x => x.id === updatedB.id ? updatedB : x);
@@ -1331,14 +1338,18 @@
       } catch (err) {
         console.error('Error quick add:', err);
         alert('Failed to save amount');
+      } finally {
+        isSaving = false;
       }
     }
 
     async function createBatch() {
+      if (isSaving) return;
       if (!newB || !newB.name.trim()) { alert('Enter order name'); return; }
       const newBatch = { ...newB, id: Date.now(), stages: JSON.parse(JSON.stringify(newB.stages)) };
 
       try {
+        isSaving = true;
         const { error } = await sbClient.from('batches').insert([newBatch]);
         if (error) throw error;
         batches = [newBatch, ...batches];
@@ -1346,6 +1357,8 @@
       } catch (err) {
         console.error('Error creating batch:', err);
         alert('Failed to save to database. Check console for details.');
+      } finally {
+        isSaving = false;
       }
     }
 
