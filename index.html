@@ -693,6 +693,8 @@
     let newB = null;
     let delConf = false;
     let searchQuery = '';
+    let quickAddStageIdx = null;
+    let longPressTimer = null;
 
     async function loadData() {
       try {
@@ -1023,7 +1025,7 @@
             </div>
           `).join('');
 
-          return `<div class="srow" style="flex-wrap:wrap; gap:4px; align-items:flex-start;">
+          return `<div class="srow" style="flex-wrap:wrap; gap:4px; align-items:flex-start; transition: background-color 0.2s; border-radius: 8px; padding: 11px 8px; margin: 0 -8px;" oncontextmenu="handleContext(event, ${i})" ontouchstart="startPress(event, ${i})" ontouchend="endPress(event)" ontouchcancel="endPress(event)">
         <div style="width:100%; display:flex; align-items:center; gap:12px;">
           <div class="snum" style="background:${has ? clr + '22' : '#111111'};border:1px solid ${has ? clr + '55' : '#222222'};color:${has ? clr : '#444'}">${i + 1}</div>
           <span class="sname" style="color:${has ? '#ddd' : '#666'}; font-weight:bold;">${stg.name || 'Unnamed Stage'}</span>
@@ -1109,6 +1111,22 @@
       <div class="btn-row">
         <button class="btn-ghost" onclick="hideDel()">Cancel</button>
         <button class="btn-del-confirm" onclick="deleteBatch()">Delete</button>
+      </div>
+    </div>
+  </div>`: ''}
+  ${quickAddStageIdx !== null ? `<div class="overlay" onclick="cancelQuickAdd()">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <h3>Quick Add Amount</h3>
+      <p>Add to <span style="color:#f59e0b;font-weight:bold">${d.stages[quickAddStageIdx].name || 'Stage'}</span></p>
+      <div style="margin-bottom:16px;">
+        <label class="lbl">AMOUNT (₹)</label>
+        <input class="inp" id="qa_amt" type="number" placeholder="Enter amount" style="margin-bottom:12px;"/>
+        <label class="lbl">DATE</label>
+        <input class="inp fp-date" id="qa_date" type="text" value="${new Date().toLocaleDateString('en-CA')}" placeholder="Date" />
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="cancelQuickAdd()">Cancel</button>
+        <button class="btn-gold" onclick="saveQuickAdd()">Save Amount</button>
       </div>
     </div>
   </div>`: ''}`;
@@ -1259,6 +1277,61 @@
       const target = isDraft ? draft : newB;
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '' }];
       target.stages[stageIdx].entries[entryIdx].date = val;
+    }
+
+    function startPress(e, idx) {
+      if(editMode) return;
+      const el = e.currentTarget;
+      el.style.backgroundColor = '#1a1a1a';
+      longPressTimer = setTimeout(() => {
+        el.style.backgroundColor = '';
+        triggerQuickAdd(idx);
+      }, 500);
+    }
+    function endPress(e) {
+      clearTimeout(longPressTimer);
+      if(e.currentTarget) e.currentTarget.style.backgroundColor = '';
+    }
+    function handleContext(e, idx) {
+      if(editMode) return;
+      e.preventDefault();
+      endPress(e);
+      triggerQuickAdd(idx);
+    }
+    function triggerQuickAdd(idx) {
+      if(editMode) return;
+      quickAddStageIdx = idx;
+      render();
+    }
+    function cancelQuickAdd() {
+      quickAddStageIdx = null;
+      render();
+    }
+    async function saveQuickAdd() {
+      const amt = document.getElementById('qa_amt').value;
+      const dt = document.getElementById('qa_date').value;
+      if (!amt) { alert('Enter amount'); return; }
+      const b = batches.find(x => x.id === selId);
+      if (!b) return;
+      const updatedB = JSON.parse(JSON.stringify(b));
+      if (!updatedB.stages[quickAddStageIdx].entries) {
+        updatedB.stages[quickAddStageIdx].entries = [];
+        if (updatedB.stages[quickAddStageIdx].cost !== undefined && updatedB.stages[quickAddStageIdx].cost !== '') {
+           updatedB.stages[quickAddStageIdx].entries.push({cost: updatedB.stages[quickAddStageIdx].cost, date: updatedB.stages[quickAddStageIdx].date || ''});
+        }
+      }
+      updatedB.stages[quickAddStageIdx].entries.push({ cost: amt, date: dt });
+      
+      try {
+        const { error } = await sbClient.from('batches').update(updatedB).eq('id', updatedB.id);
+        if (error) throw error;
+        batches = batches.map(x => x.id === updatedB.id ? updatedB : x);
+        quickAddStageIdx = null;
+        render();
+      } catch (err) {
+        console.error('Error quick add:', err);
+        alert('Failed to save amount');
+      }
     }
 
     async function createBatch() {
