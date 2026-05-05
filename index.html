@@ -948,10 +948,13 @@
         const clr = STAGE_COLORS[i % STAGE_COLORS.length];
         const entries = stg.entries || [{cost:'', date:''}];
         const entriesHTML = entries.map((ent, eIdx) => `
-          <div style="width:100%; display:flex; align-items:center; gap:8px; padding-left:16px; margin-top:8px;">
-            <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ Amount" value="${ent.cost}" oninput="updateStageCost(false, ${i}, ${eIdx}, this.value)" />
-            <input class="inp-sm fp-date stage-date-inp" type="text" data-placeholder="Date" placeholder="Date" value="${toInputDate(ent.date)}" oninput="updateStageDate(false, ${i}, ${eIdx}, this.value);" />
-            <button class="btn-del" style="padding:4px 8px; font-size:10px;" onclick="removeStageEntry(false, ${i}, ${eIdx})">✕</button>
+          <div style="width:100%; display:flex; flex-direction:column; gap:6px; padding-left:16px; margin-top:10px; padding-bottom:10px; border-bottom:1px solid #222;">
+            <input class="inp-sm" style="width:100%; padding:8px 10px;" type="text" placeholder="Description (Labor, Polish etc.)" value="${ent.note || ''}" oninput="updateStageNote(false, ${i}, ${eIdx}, this.value)" />
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ Amount" value="${ent.cost}" oninput="updateStageCost(false, ${i}, ${eIdx}, this.value)" />
+              <input class="inp-sm fp-date stage-date-inp" type="text" data-placeholder="Date" placeholder="Date" value="${toInputDate(ent.date)}" oninput="updateStageDate(false, ${i}, ${eIdx}, this.value);" />
+              <button class="btn-del" style="padding:4px 8px; font-size:10px;" onclick="removeStageEntry(false, ${i}, ${eIdx})">✕</button>
+            </div>
           </div>
         `).join('');
         
@@ -1000,10 +1003,13 @@
 
         if (editMode) {
           const entriesHTML = entries.map((ent, eIdx) => `
-            <div style="width:100%; display:flex; align-items:center; gap:8px; padding-left:16px; margin-top:8px;">
-              <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ Amount" value="${ent.cost}" oninput="updateStageCost(true, ${i}, ${eIdx}, this.value)" />
-              <input class="inp-sm fp-date stage-date-inp" type="text" data-placeholder="Date" placeholder="Date" value="${toInputDate(ent.date)}" oninput="updateStageDate(true, ${i}, ${eIdx}, this.value);" />
-              <button class="btn-del" style="padding:4px 8px; font-size:10px;" onclick="removeStageEntry(true, ${i}, ${eIdx})">✕</button>
+            <div style="width:100%; display:flex; flex-direction:column; gap:6px; padding-left:16px; margin-top:10px; padding-bottom:10px; border-bottom:1px solid #222;">
+              <input class="inp-sm" style="width:100%; padding:8px 10px;" type="text" placeholder="Description (Labor, Polish etc.)" value="${ent.note || ''}" oninput="updateStageNote(true, ${i}, ${eIdx}, this.value)" />
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input class="inp-sm" style="width:100px; padding:8px 10px;" type="number" placeholder="₹ Amount" value="${ent.cost}" oninput="updateStageCost(true, ${i}, ${eIdx}, this.value)" />
+                <input class="inp-sm fp-date stage-date-inp" type="text" data-placeholder="Date" placeholder="Date" value="${toInputDate(ent.date)}" oninput="updateStageDate(true, ${i}, ${eIdx}, this.value);" />
+                <button class="btn-del" style="padding:4px 8px; font-size:10px;" onclick="removeStageEntry(true, ${i}, ${eIdx})">✕</button>
+              </div>
             </div>
           `).join('');
 
@@ -1021,7 +1027,10 @@
         } else {
           const viewEntriesHTML = entries.filter(e => e.cost !== '' && e.cost != null).map(ent => `
             <div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:monospace; margin-top:4px; color:#aaa;">
-              <span>₹${fmt(ent.cost)}</span>
+              <div style="display:flex; align-items:center; gap:20px; font-weight:800; font-size:12px;">
+                ${ent.note ? `<span style="color:#666;font-style:italic;">${ent.note}</span>` : ''}
+                <span>₹${fmt(ent.cost)}</span>
+              </div>
               <span>${fmtDateUI(ent.date) || '—'}</span>
             </div>
           `).join('');
@@ -1034,8 +1043,8 @@
         </div>
         ${has ? `<div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:monospace; margin-top:4px; margin-bottom:4px;">
           <div style="display:flex; align-items:center;">
-            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:bold; width:100px; display:inline-block; letter-spacing:0.5px;">₹${(parseFloat(sCost)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : (has ? `<span style="width:100px; display:inline-block;"></span>` : '')}
-            ${(has && cost > 0) ? `<span style="color:#3b82f6; font-weight:bold; width:55px; text-align:center; display:inline-block;">${((parseFloat(sCost)/cost)*100).toFixed(1)}%</span>` : ''}
+            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px; letter-spacing:0.5px; margin-right:20px;">₹${(parseFloat(sCost)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : ''}
+            ${(has && cost > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px;">${((parseFloat(sCost)/cost)*100).toFixed(1)}%</span>` : ''}
           </div>
         </div>` : ''}
         ${viewEntriesHTML}
@@ -1120,6 +1129,8 @@
       <h3>Quick Add Amount</h3>
       <p>Add to <span style="color:#f59e0b;font-weight:bold">${d.stages[quickAddStageIdx].name || 'Stage'}</span></p>
       <div style="margin-bottom:16px;">
+        <label class="lbl">DESCRIPTION</label>
+        <input class="inp" id="qa_note" type="text" placeholder="e.g. Labor, Polish" style="margin-bottom:12px;"/>
         <label class="lbl">AMOUNT (₹)</label>
         <input class="inp" id="qa_amt" type="number" placeholder="Enter amount" style="margin-bottom:12px;"/>
         <label class="lbl">DATE</label>
@@ -1283,6 +1294,11 @@
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '' }];
       target.stages[stageIdx].entries[entryIdx].date = val;
     }
+    function updateStageNote(isDraft, stageIdx, entryIdx, val) {
+      const target = isDraft ? draft : newB;
+      if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '', note: '' }];
+      target.stages[stageIdx].entries[entryIdx].note = val;
+    }
 
     function startPress(e, idx) {
       if(editMode) return;
@@ -1314,6 +1330,7 @@
     }
     async function saveQuickAdd() {
       if (isSaving) return;
+      const note = document.getElementById('qa_note').value;
       const amt = document.getElementById('qa_amt').value;
       const dt = document.getElementById('qa_date').value;
       if (!amt) { alert('Enter amount'); return; }
@@ -1326,7 +1343,7 @@
            updatedB.stages[quickAddStageIdx].entries.push({cost: updatedB.stages[quickAddStageIdx].cost, date: updatedB.stages[quickAddStageIdx].date || ''});
         }
       }
-      updatedB.stages[quickAddStageIdx].entries.push({ cost: amt, date: dt });
+      updatedB.stages[quickAddStageIdx].entries.push({ cost: amt, date: dt, note: note });
       
       try {
         isSaving = true;
