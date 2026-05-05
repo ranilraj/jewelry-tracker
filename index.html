@@ -826,6 +826,10 @@
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (b.name && b.name.toLowerCase().includes(q)) || (b.id && b.id.toString().includes(q));
+      }).sort((a, b) => {
+        const t1 = isNaN(parseDateObj(a.date)) ? 0 : parseDateObj(a.date).getTime();
+        const t2 = isNaN(parseDateObj(b.date)) ? 0 : parseDateObj(b.date).getTime();
+        return t1 === t2 ? b.id - a.id : t2 - t1;
       });
       const cards = filteredBatches.length === 0 ? (searchQuery ? `<div class="empty">No batches found.</div>` : `<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>`) :
         filteredBatches.map(b => {
@@ -1128,6 +1132,10 @@
       const filteredBatches = batches.filter(b => {
         if (!searchQuery) return true;
         return (b.name && b.name.toLowerCase().includes(q)) || (b.id && b.id.toString().includes(q));
+      }).sort((a, b) => {
+        const t1 = isNaN(parseDateObj(a.date)) ? 0 : parseDateObj(a.date).getTime();
+        const t2 = isNaN(parseDateObj(b.date)) ? 0 : parseDateObj(b.date).getTime();
+        return t1 === t2 ? b.id - a.id : t2 - t1;
       });
       const cards = filteredBatches.length === 0 ? (searchQuery ? `<div class="empty">No batches found.</div>` : `<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>`) :
         filteredBatches.map(b => {
