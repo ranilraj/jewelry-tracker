@@ -1348,17 +1348,30 @@
     function cancelEdit() { editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render(); }
     async function saveEdit() {
       if (isSaving) return;
+      if (!draft) return;
       try {
         isSaving = true;
-        const { error } = await sbClient.from('batches').update(draft).eq('id', draft.id);
+        render(); // Show "Saving..." on button
+        
+        // ACID: Ensure we don't send the ID in the body (Isolation/Consistency)
+        const { id, ...updateData } = draft;
+        
+        const { error } = await sbClient.from('batches').update(updateData).eq('id', id);
         if (error) throw error;
-        batches = batches.map(b => b.id === selId ? { ...draft } : b);
-        editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render();
+        
+        // Durability: Update local state only after successful DB write
+        batches = batches.map(b => b.id === id ? JSON.parse(JSON.stringify(draft)) : b);
+        editMode = false; 
+        draft = null; 
+        clearLocal(LS_KEY_DRAFT);
+        render();
+        alert('Changes saved successfully!');
       } catch (err) {
         console.error('Error saving edit:', err);
-        alert('Failed to save to database. Check console for details.');
+        alert('CRITICAL ERROR: Failed to save to database. Please check your internet connection or console for details.');
       } finally {
         isSaving = false;
+        render();
       }
     }
     function showDel() { delConf = true; render(); }
@@ -1496,6 +1509,8 @@
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '' }];
       target.stages[stageIdx].entries[entryIdx].cost = val;
       saveToLocal();
+      // We don't render() here to avoid losing focus while typing, 
+      // but we update the totals manually if needed or let the user click save.
     }
     function updateStageDate(isDraft, stageIdx, entryIdx, val) {
       const target = isDraft ? draft : newB;
@@ -1669,24 +1684,29 @@
     async function createBatch() {
       if (isSaving) return;
       if (!newB || !newB.name.trim()) { alert('Enter order name'); return; }
-      const newBatch = { ...newB, id: Date.now(), stages: JSON.parse(JSON.stringify(newB.stages)) };
-
+      
+      const payload = JSON.parse(JSON.stringify(newB));
+      
       try {
         isSaving = true;
-        render(); // Immediately show "Saving..." state
-        const { error } = await sbClient.from('batches').insert([newBatch]);
+        render(); // Show "Saving..." state
+        const { data, error } = await sbClient.from('batches').insert([payload]).select();
         if (error) throw error;
-        batches = [newBatch, ...batches];
+        
+        const savedBatch = cleanBatch(data[0]);
+        batches = [savedBatch, ...batches];
         newB = null;
         clearLocal(LS_KEY_NEW);
         clearLocal(LS_KEY_STATE);
         view = 'list';
         render();
+        alert('Batch created successfully!');
       } catch (err) {
         console.error('Error creating batch:', err);
-        alert('Failed to save to database. Check console for details.');
+        alert('CRITICAL ERROR: Failed to create batch. Please check your internet connection.');
       } finally {
         isSaving = false;
+        render();
       }
     }
 
