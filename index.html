@@ -1585,7 +1585,7 @@
     }
 
     function renderInventoryView() {
-      const unsold = batches.filter(b => totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
+      const unsold = batches.filter(b => b.sellingDate && totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
       const cards = unsold.length === 0 ? `<div class="empty">No unsold inventory.</div>` :
         unsold.map(b => {
           const remaining = (parseFloat(b.qty) || 0) - totalSoldQty(b);
@@ -1613,7 +1613,7 @@
     function renderSalesView() {
       const allSales = [];
       batches.forEach(b => {
-        if (b.sales && b.sales.length > 0) {
+        if (b.sellingDate && b.sales && b.sales.length > 0) {
           b.sales.forEach(s => {
             allSales.push({ ...s, batchId: b.id, batchName: b.name });
           });
@@ -1651,7 +1651,7 @@
     function renderQuickSaleOverlay() {
       if (quickAddSaleBatchId === true) {
         // Step 1: Select Batch
-        const available = batches.filter(b => totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
+        const available = batches.filter(b => b.sellingDate && totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
         const list = available.length === 0 ? `<div class="empty">No batches with remaining stock.</div>` :
           available.map(b => `
             <div class="srow" style="padding:12px; border:1px solid #222; border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="quickAddSaleBatchId=${b.id};render()">
