@@ -939,15 +939,6 @@
     <button class="new-btn" onclick="goNew()">+ New Batch</button>
   </div>
   <div class="content">
-    <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LIFETIME STATS</div>
-    <div class="stats" style="margin-bottom:24px;">
-      <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">TOTAL REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(allRevenue)}</div></div>
-      <div class="stat"><div class="stat-lbl">BATCHES</div><div class="stat-val" style="color:#aaa">${total}</div></div>
-      <div class="stat"><div class="stat-lbl">TOTAL SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend)}</div></div>
-      <div class="stat"><div class="stat-lbl">AVG MARGIN</div><div class="stat-val" style="color:${avg >= 0 ? '#10b981' : '#ef4444'}">${avg.toFixed(1)}%</div></div>
-      <div class="stat"><div class="stat-lbl">TOTAL PROFIT</div><div class="stat-val" style="color:${allNetProfit >= 0 ? '#10b981' : '#ef4444'}">${allNetProfit >= 0 ? '+' : '-'}₹${sfmt(Math.abs(allNetProfit))}</div></div>
-    </div>
-    
     <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
     <div class="stats" style="margin-bottom:24px;">
       <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">30D REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(revenue30)}</div></div>

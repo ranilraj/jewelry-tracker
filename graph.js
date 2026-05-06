@@ -1,21 +1,50 @@
 function renderGraphView(batches) {
+  // Stats calculations
+  const _totalCost = (st) => {
+    if (!Array.isArray(st)) return 0;
+    return st.reduce((s, stg) => {
+      const entries = stg.entries || [];
+      const stgSum = entries.reduce((acc, e) => acc + (parseFloat(e.cost) || 0), 0);
+      return s + stgSum;
+    }, 0);
+  };
+  const _totalSalesRevenue = (b) => {
+    if (typeof totalSalesRevenue === 'function') return totalSalesRevenue(b);
+    if (!b.sales || !Array.isArray(b.sales)) return parseFloat(b.sellingPrice) || 0;
+    return b.sales.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0);
+  };
+
+  const total = batches.length;
+  const spend = batches.reduce((s, b) => s + _totalCost(b.stages), 0);
+  const allRevenue = batches.reduce((s, b) => s + _totalSalesRevenue(b), 0);
+  const pb = batches.filter(b => _totalSalesRevenue(b) > 0);
+  const avg = pb.length ? pb.reduce((s, b) => { 
+    const c = _totalCost(b.stages), sp = _totalSalesRevenue(b); 
+    return s + (c > 0 ? ((sp - c) / c * 100) : 0); 
+  }, 0) / pb.length : 0;
+  const allNetProfit = allRevenue - spend;
+
   return `
-    <div class="header" style="justify-content:space-between; align-items:center;">
-      <div style="width:80px;"></div>
-      <div style="display:flex; flex-direction:column; align-items:center;">
-        <div class="brand">RANIL JEWELLERS</div>
-        <div class="title">Analytics</div>
-      </div>
-      <button class="btn-edit" style="width:80px; padding:6px 0; font-size:11px; color:#f97316; border-color:#f9731633; background:rgba(249,115,22,0.1);" onclick="exportCSV()">Export CSV</button>
+    <div class="header">
+      <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Analytics</div></div>
     </div>
     <div class="content" style="padding-top:20px;">
       <div class="card" style="margin-bottom:20px;">
         <div class="clbl">LAST 5 BATCHES (PROFIT)</div>
         <canvas id="batchChart" width="400" height="250"></canvas>
       </div>
-      <div class="card">
+      <div class="card" style="margin-bottom:20px;">
         <div class="clbl">MONTHLY PROFIT</div>
         <canvas id="monthlyChart" width="400" height="250"></canvas>
+      </div>
+
+      <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;margin-top:20px;">LIFETIME STATS</div>
+      <div class="stats" style="margin-bottom:24px;">
+        <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">TOTAL REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${typeof sfmt === 'function' ? sfmt(allRevenue) : allRevenue.toLocaleString()}</div></div>
+        <div class="stat"><div class="stat-lbl">BATCHES</div><div class="stat-val" style="color:#aaa">${total}</div></div>
+        <div class="stat"><div class="stat-lbl">TOTAL SPEND</div><div class="stat-val" style="color:#f97316">₹${typeof sfmt === 'function' ? sfmt(spend) : spend.toLocaleString()}</div></div>
+        <div class="stat"><div class="stat-lbl">AVG MARGIN</div><div class="stat-val" style="color:${avg >= 0 ? '#10b981' : '#ef4444'}">${avg.toFixed(1)}%</div></div>
+        <div class="stat"><div class="stat-lbl">TOTAL PROFIT</div><div class="stat-val" style="color:${allNetProfit >= 0 ? '#10b981' : '#ef4444'}">${allNetProfit >= 0 ? '+' : '-'}₹${typeof sfmt === 'function' ? sfmt(Math.abs(allNetProfit)) : Math.abs(allNetProfit).toLocaleString()}</div></div>
       </div>
     </div>
   `;
