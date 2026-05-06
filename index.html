@@ -713,6 +713,7 @@
     let longPressTimer = null;
     let isSaving = false;
     let quickAddSaleBatchId = null;
+    let quickAddCompId = null;
 
     async function loadData() {
       try {
@@ -906,7 +907,14 @@
           const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#f59e0b'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate" 
+                 onmousedown="startCompPress(event, ${b.id})" 
+                 ontouchstart="startCompPress(event, ${b.id})" 
+                 onmouseup="endPress(event)" 
+                 ontouchend="endPress(event)" 
+                 oncontextmenu="handleCompContext(event, ${b.id})">
+              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}
+            </div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
@@ -1187,7 +1195,14 @@
       <div>
         <label class="lbl">COMPLETION DATE</label>
         ${editMode ? `<input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(d.sellingDate)}" oninput="dr_set('sellingDate',this.value);"/>`
-          : `<div class="price-static" style="color:#aaa;font-size:14px">${fmtDateUI(d.sellingDate) || '—'}</div>`}
+          : `<div class="price-static" style="color:#aaa;font-size:14px;cursor:pointer;" 
+               onmousedown="startCompPress(event, ${d.id})" 
+               ontouchstart="startCompPress(event, ${d.id})" 
+               onmouseup="endPress(event)" 
+               ontouchend="endPress(event)" 
+               oncontextmenu="handleCompContext(event, ${d.id})">
+               ${fmtDateUI(d.sellingDate) || '—'}
+             </div>`}
       </div>
     </div>
     ${(editMode || d.notes) ? `<div class="card"><div class="clbl">NOTES</div>
@@ -1320,7 +1335,14 @@
           const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#f59e0b'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate" 
+                 onmousedown="startCompPress(event, ${b.id})" 
+                 ontouchstart="startCompPress(event, ${b.id})" 
+                 onmouseup="endPress(event)" 
+                 ontouchend="endPress(event)" 
+                 oncontextmenu="handleCompContext(event, ${b.id})">
+              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}
+            </div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
@@ -1401,6 +1423,73 @@
       const target = isDraft ? draft : (view === 'new' ? newB : null);
       if (!target) return;
       target.sales[idx][key] = val;
+    }
+
+    function startCompPress(e, id) {
+      if(editMode) return;
+      e.stopPropagation();
+      const el = e.currentTarget;
+      el.style.backgroundColor = '#1a1a1a';
+      longPressTimer = setTimeout(() => {
+        el.style.backgroundColor = '';
+        triggerQuickComp(id);
+      }, 800);
+    }
+    function handleCompContext(e, id) {
+      if(editMode) return;
+      e.preventDefault(); e.stopPropagation();
+      endPress(e);
+      triggerQuickComp(id);
+    }
+    function triggerQuickComp(id) {
+      if(editMode) return;
+      quickAddCompId = id;
+      render();
+    }
+    function cancelQuickComp() { quickAddCompId = null; render(); }
+    async function saveQuickComp() {
+      if (isSaving) return;
+      const b = batches.find(x => x.id === quickAddCompId);
+      if (!b) return;
+      const date = document.getElementById('qc_date').value;
+      if (!date) { alert('Select a date'); return; }
+      
+      const updatedB = { ...b, sellingDate: date };
+      try {
+        isSaving = true;
+        const { error } = await sbClient.from('batches').update(updatedB).eq('id', b.id);
+        if (error) throw error;
+        batches = batches.map(x => x.id === b.id ? updatedB : x);
+        quickAddCompId = null;
+        render();
+      } catch (err) {
+        console.error('Error saving quick completion:', err);
+        alert('Failed to save');
+      } finally {
+        isSaving = false;
+      }
+    }
+
+    function renderQuickCompOverlay() {
+      const b = batches.find(x => x.id === quickAddCompId);
+      if (!b) return '';
+      return `<div class="overlay" onclick="cancelQuickComp()">
+        <div class="sheet" onclick="event.stopPropagation()">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3>Quick Completion</h3>
+            <button class="btn-del" onclick="cancelQuickComp()">✕</button>
+          </div>
+          <p style="margin-bottom:16px; color:#aaa;">Mark <b>${b.name}</b> (#${b.id}) as completed.</p>
+          <div style="margin-bottom:20px;">
+            <label class="lbl">COMPLETION DATE</label>
+            <input class="inp fp-date" id="qc_date" type="text" value="${new Date().toLocaleDateString('en-CA')}" placeholder="Select Date" />
+          </div>
+          <div class="btn-row">
+            <button class="btn-ghost" style="flex:1" onclick="cancelQuickComp()">Cancel</button>
+            <button class="btn-gold" style="flex:2" onclick="saveQuickComp()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Mark Completed'}</button>
+          </div>
+        </div>
+      </div>`;
     }
 
     function startPress(e, idx) {
@@ -1775,6 +1864,7 @@
         `;
       }
       
+      if (quickAddCompId !== null) html += renderQuickCompOverlay();
       document.getElementById('app').innerHTML = html;
       
       setTimeout(() => {
