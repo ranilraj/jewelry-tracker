@@ -793,6 +793,7 @@
       return `<span class="badge" style="background:${isP ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${c};border:1px solid ${c}">${isP ? '▲' : '▼'} ${Math.abs(p).toFixed(1)}%</span>`;
     }
     function profitCardHTML(b) {
+      if ((!b.sales || b.sales.length === 0) && !b.sellingDate) return '';
       const cost = totalCost(b.stages); const sell = totalSalesRevenue(b);
       const profit = sell - cost; const pct = cost ? (profit / cost * 100) : 0; const isP = profit >= 0;
       const clr = isP ? '#10b981' : '#ef4444';
