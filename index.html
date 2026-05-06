@@ -1174,12 +1174,12 @@
     </div>
     <div class="card">
       <div class="flex2">
-        <div><label class="lbl">START DATE</label><input class="inp fp-date" type="text" data-placeholder="Select Date" placeholder="Select Date" value="${toInputDate(nd.date)}" readonly /></div>
+        <div><label class="lbl">START DATE</label><input class="inp fp-date" data-key="date" type="text" data-placeholder="Select Date" placeholder="Select Date" value="${toInputDate(nd.date)}" readonly /></div>
         <div><label class="lbl">TOTAL QTY (pcs)</label><input class="inp" type="number" placeholder="0" value="${nd.qty}" oninput="nd_set('qty',this.value)"/></div>
       </div>
       <div style="margin-top:12px">
         <label class="lbl">COMPLETION DATE (marks green)</label>
-        <input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(nd.sellingDate)}" readonly />
+        <input class="inp fp-date" data-key="sellingDate" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(nd.sellingDate)}" readonly />
       </div>
     </div>
     <div class="card">
@@ -1338,7 +1338,7 @@
     `}
     <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
       ${editMode
-          ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
+          ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-key="date" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" readonly /></div>`
           : `<span>START: ${fmtDateUI(d.date)}</span>`}
       ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
@@ -1374,7 +1374,7 @@
               <button class="btn-del" style="height:36px; margin-top:18px;" onclick="removeSale(true, ${si})">✕</button>
             </div>
             <div style="display:flex; gap:8px;">
-              <div style="flex:1;"><label class="lbl">DATE</label><input class="inp-sm fp-date" style="width:100%;" type="text" value="${toInputDate(sale.date)}" oninput="updateSale(true, ${si}, 'date', this.value)"/></div>
+              <div style="flex:1;"><label class="lbl">DATE</label><input class="inp-sm fp-date" style="width:100%;" type="text" value="${toInputDate(sale.date)}" oninput="updateSale(true, ${si}, 'date', this.value)" readonly /></div>
               <div style="flex:1;"><label class="lbl">STORE</label><input class="inp-sm" style="width:100%;" type="text" placeholder="Store name" value="${sale.store || ''}" oninput="updateSale(true, ${si}, 'store', this.value)"/></div>
             </div>
           </div>`;
@@ -1403,14 +1403,14 @@
       </div>
       <div>
         <label class="lbl">COMPLETION DATE</label>
-        ${editMode ? `<input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(d.sellingDate)}" oninput="dr_set('sellingDate',this.value);"/>`
+        ${editMode ? `<input class="inp fp-date" data-key="sellingDate" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(d.sellingDate)}" readonly />`
           : `<div class="price-static" style="color:#aaa;font-size:14px;cursor:pointer;" 
                onmousedown="startCompPress(event, ${d.id})" 
                ontouchstart="startCompPress(event, ${d.id})" 
                onmouseup="endPress(event)" 
                ontouchend="endPress(event)" 
                oncontextmenu="handleCompContext(event, ${d.id})">
-               ${fmtDateUI(d.sellingDate) || '—'}
+               ${d.sellingDate ? fmtDateUI(d.sellingDate) : 'Tap to Mark Completion'}
              </div>`}
       </div>
     </div>
@@ -2193,8 +2193,9 @@
           disableMobile: true,
           allowInput: false,
           onChange: function (selectedDates, dateStr, instance) {
-            if (view === 'new') nd_set('date', dateStr);
-            else if (editMode) dr_set('date', dateStr);
+            const key = instance.element.dataset.key || 'date';
+            if (view === 'new') nd_set(key, dateStr);
+            else if (editMode) dr_set(key, dateStr);
             else {
               instance.element.value = dateStr;
             }
