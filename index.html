@@ -27,7 +27,6 @@
       color: #e8e8e8;
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
-      min-height: 100dvh;
       overflow-x: hidden;
       color-scheme: dark;
       accent-color: #f97316;
@@ -140,26 +139,20 @@
     }
 
     .content {
-      padding: 0 16px calc(100px + env(safe-area-inset-bottom));
+      padding: 0 16px 70px;
     }
 
     .bottom-nav {
       position: fixed;
-      bottom: 16px; /* Fallback for older browsers */
-      bottom: calc(16px + env(safe-area-inset-bottom));
-      left: 16px;
-      right: 16px;
-      background: rgba(10, 10, 10, 0.9);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #000000;
+      border-top: 1px solid #222222;
       display: flex;
       justify-content: space-around;
-      padding: 12px 0;
+      padding: 10px 0;
       z-index: 1000;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
     }
 
     .nav-item {
@@ -1261,7 +1254,12 @@
     }
 
     function renderDetail() {
-      const b = batches.find(x => x.id === selId); if (!b) return renderList();
+      const b = batches.find(x => x.id === selId);
+      if (!b) {
+        view = 'list';
+        selId = null;
+        return renderList();
+      }
       const d = editMode ? draft : b;
       const cost = totalCost(d.stages); const sell = parseFloat(d.sellingPrice);
 
@@ -2157,9 +2155,7 @@
       else if (view === 'inventory') html = renderInventoryView();
       else if (view === 'sales') html = renderSalesView();
 
-      // Navigation bar (Robust Visibility Logic)
-      const isNavHidden = !auth || view === 'new' || editMode || view === 'detail';
-      if (!isNavHidden) {
+      if (auth && !editMode && (view === 'list' || view === 'detail' || view === 'graph' || view === 'profit_engine' || view === 'inventory' || view === 'sales')) {
         html += `
           <div class="bottom-nav">
             <div class="nav-item ${view === 'list' ? 'active' : ''}" onclick="view='list';render()">
