@@ -710,7 +710,6 @@
     let delConf = false;
     let searchQuery = '';
     let quickAddStageIdx = null;
-    let quickAddCompId = null;
     let longPressTimer = null;
     let isSaving = false;
     let quickAddSaleBatchId = null;
@@ -1120,14 +1119,9 @@
       <div style="font-size:18px;font-weight:700;">${d.name}</div>
     </div>
     `}
-    <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;"
-         onmousedown="startCompPress(event, ${d.id})" 
-         ontouchstart="startCompPress(event, ${d.id})" 
-         onmouseup="endPress(event)" 
-         ontouchend="endPress(event)" 
-         oncontextmenu="handleCompContext(event, ${d.id})">
+    <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
       ${editMode 
-        ? `<div style="display:flex;align-items:center;gap:8px;" onclick="event.stopPropagation()"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
+        ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
         : `<span>START: ${fmtDateUI(d.date)}</span>`}
       ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
@@ -1326,18 +1320,7 @@
           const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#f59e0b'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div>
-            <div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div>
-            <div class="bname">${b.name}</div>
-            <div class="bdate"
-                 onmousedown="startCompPress(event, ${b.id})" 
-                 ontouchstart="startCompPress(event, ${b.id})" 
-                 onmouseup="endPress(event)" 
-                 ontouchend="endPress(event)" 
-                 oncontextmenu="handleCompContext(event, ${b.id})">
-              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}
-            </div>
-          </div>
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
@@ -1444,82 +1427,9 @@
       quickAddStageIdx = idx;
       render();
     }
-    function startCompPress(e, id) {
-      if(editMode) return;
-      e.stopPropagation();
-      const el = e.currentTarget;
-      el.style.backgroundColor = '#1a1a1a';
-      longPressTimer = setTimeout(() => {
-        el.style.backgroundColor = '';
-        triggerQuickComp(id);
-      }, 800);
-    }
-    function handleCompContext(e, id) {
-      if(editMode) return;
-      e.preventDefault(); e.stopPropagation();
-      endPress(e);
-      triggerQuickComp(id);
-    }
-    function triggerQuickComp(id) {
-      if(editMode) return;
-      quickAddCompId = id;
-      render();
-    }
-    function cancelQuickComp() { quickAddCompId = null; render(); }
-    async function saveQuickComp() {
-      if (isSaving) return;
-      const b = batches.find(x => x.id === quickAddCompId);
-      if (!b) return;
-      const date = document.getElementById('qc_date').value;
-      if (!date) { alert('Select a date'); return; }
-      
-      const updatedB = { ...b, sellingDate: date };
-      try {
-        isSaving = true;
-        const { error } = await sbClient.from('batches').update(updatedB).eq('id', b.id);
-        if (error) throw error;
-        batches = batches.map(x => x.id === b.id ? updatedB : x);
-        quickAddCompId = null;
-        render();
-      } catch (err) {
-        console.error('Error saving quick completion:', err);
-        alert('Failed to save');
-      } finally {
-        isSaving = false;
-      }
-    }
-
-    function renderQuickCompOverlay() {
-      const b = batches.find(x => x.id === quickAddCompId);
-      if (!b) return '';
-      return `<div class="overlay" onclick="cancelQuickComp()">
-        <div class="sheet" onclick="event.stopPropagation()">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <h3>Quick Completion</h3>
-            <button class="btn-del" onclick="cancelQuickComp()">✕</button>
-          </div>
-          <p style="margin-bottom:16px; color:#aaa;">Mark <b>${b.name}</b> (#${b.id}) as completed.</p>
-          <div style="margin-bottom:20px;">
-            <label class="lbl">COMPLETION DATE</label>
-            <input class="inp fp-date" id="qc_date" type="text" value="${new Date().toLocaleDateString('en-CA')}" placeholder="Select Date" />
-          </div>
-          <div class="btn-row">
-            <button class="btn-ghost" style="flex:1" onclick="cancelQuickComp()">Cancel</button>
-            <button class="btn-gold" style="flex:2" onclick="saveQuickComp()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Mark Completed'}</button>
-          </div>
-        </div>
-      </div>`;
-    }
     function cancelQuickAdd() {
       quickAddStageIdx = null;
       render();
-    }
-    
-    function renderQuickAddOverlay() {
-      const b = batches[0]; // Logic needs to be specific if this is from list
-      // Wait, quickAddStageIdx needs a batch context too.
-      // I'll update the trigger to set both batchId and stageIdx.
-      return ''; // Placeholder for now, I need to fix the trigger logic first.
     }
     async function saveQuickAdd() {
       if (isSaving) return;
@@ -1864,9 +1774,6 @@
           </div>
         `;
       }
-      
-      if (quickAddCompId !== null) html += renderQuickCompOverlay();
-      if (quickAddStageIdx !== null && typeof renderQuickAddOverlay === 'function') html += renderQuickAddOverlay();
       
       document.getElementById('app').innerHTML = html;
       
