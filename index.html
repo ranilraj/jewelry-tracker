@@ -1622,8 +1622,20 @@
             <button class="btn-ghost" style="flex:1" onclick="cancelQuickComp()">Cancel</button>
             <button class="btn-gold" style="flex:2" onclick="saveQuickComp()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Mark Completed'}</button>
           </div>
+          </div>
         </div>
       </div>`;
+    }
+
+    function hardRefresh() {
+      if (!confirm('This will clear your local cache and reload. Proceed?')) return;
+      localStorage.clear();
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let reg of registrations) reg.unregister();
+        });
+      }
+      window.location.reload(true);
     }
 
     function startPress(e, idx) {
@@ -1807,6 +1819,12 @@
           <div style="font-family:monospace;font-size:10px;color:#555;margin-top:6px;">To reach ₹1,00,000</div>
         </div>
       </div>
+    </div>
+    </div>
+    <div class="card" style="margin-top:20px; border-color:#ef4444; background:rgba(239,68,68,0.05);">
+      <div class="clbl" style="color:#ef4444">TROUBLESHOOTING</div>
+      <p style="font-size:12px; color:#aaa; margin-bottom:12px;">If your data is not syncing or the screen is stuck, try a hard refresh.</p>
+      <button class="btn-del" style="width:100%;" onclick="hardRefresh()">Force Clear & Refresh</button>
     </div>
   </div>`;
     }
@@ -2029,7 +2047,21 @@
     render();
     loadData();
 
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => { }); }
+    if ('serviceWorker' in navigator) { 
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        reg.onupdatefound = () => {
+          const installingWorker = reg.installing;
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New update available
+              if(confirm('New version available! Reload to update?')) {
+                window.location.reload();
+              }
+            }
+          };
+        };
+      }).catch(() => { }); 
+    }
   </script>
 </body>
 

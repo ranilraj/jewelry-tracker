@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ranil-tracker-v15';
+const CACHE_NAME = 'ranil-tracker-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -28,9 +28,14 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   // Use a simple network-first strategy for dynamic data AND HTML
-  if (e.request.mode === 'navigate' || e.request.url.includes('supabase.co')) {
+  if (e.request.mode === 'navigate' || e.request.url.includes('supabase.co') || e.request.url.includes('index.html')) {
     e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
+      fetch(e.request).then(response => {
+        // Cache the new version
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        return response;
+      }).catch(() => caches.match(e.request))
     );
   } else {
     e.respondWith(
