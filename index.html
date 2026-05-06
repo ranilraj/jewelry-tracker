@@ -643,7 +643,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_FFtC1lxP8uCWuDBFQ1WGOA_N0rZS4rt';
     const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // ------------------------------
-
+// stages editing code 
     const STAGE_TEMPLATES = {
       'stone': {
         label: 'Stone Jewelry',
@@ -1438,13 +1438,10 @@
       render(); 
     }
     function cancelEdit() { editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render(); }
-    async function saveEdit() {
-      if (isSaving) return;
-      try {
-        isSaving = true;
-        render(); // Show "Saving..."
-        
-        const { error } = await sbClient.from('batches').update(draft).eq('id', draft.id);
+        const updatedB = JSON.parse(JSON.stringify(draft));
+        delete updatedB.template;
+
+        const { error } = await sbClient.from('batches').update(updatedB).eq('id', updatedB.id);
         if (error) throw error;
         
         batches = batches.map(b => b.id === selId ? { ...draft } : b);
@@ -1464,8 +1461,8 @@
       } catch (err) {
         console.error('Error saving edit:', err);
         alert('Failed to save to database. Check console for details.');
-      } finally {
         isSaving = false;
+        render();
       }
     }
     function showDel() { delConf = true; render(); }
@@ -1788,7 +1785,9 @@
     async function createBatch() {
       if (isSaving) return;
       if (!newB || !newB.name.trim()) { alert('Enter order name'); return; }
-      const newBatch = { ...newB, id: Date.now(), stages: JSON.parse(JSON.stringify(newB.stages)) };
+      const newBatch = JSON.parse(JSON.stringify(newB));
+      newBatch.id = Date.now();
+      delete newBatch.template; // REMOVE UI-ONLY FIELD
 
       try {
         isSaving = true;
@@ -1814,8 +1813,8 @@
       } catch (err) {
         console.error('Error creating batch:', err);
         alert('Failed to save to database. Check console for details.');
-      } finally {
         isSaving = false;
+        render();
       }
     }
 
