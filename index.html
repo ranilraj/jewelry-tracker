@@ -865,8 +865,8 @@
         const aComp = (a.sellingDate && a.sellingPrice) ? 1 : 0;
         const bComp = (b.sellingDate && b.sellingPrice) ? 1 : 0;
         if (aComp !== bComp) return aComp - bComp;
-        const dA = parseDateObj(a.date).getTime() || 0;
-        const dB = parseDateObj(b.date).getTime() || 0;
+        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj(a.sellingDate).getTime() || 0);
+        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj(b.sellingDate).getTime() || 0);
         if (dA !== dB) return dB - dA;
         return b.id - a.id;
       });
@@ -1229,8 +1229,8 @@
         const aComp = (a.sellingDate && a.sellingPrice) ? 1 : 0;
         const bComp = (b.sellingDate && b.sellingPrice) ? 1 : 0;
         if (aComp !== bComp) return aComp - bComp;
-        const dA = parseDateObj(a.date).getTime() || 0;
-        const dB = parseDateObj(b.date).getTime() || 0;
+        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj(a.sellingDate).getTime() || 0);
+        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj(b.sellingDate).getTime() || 0);
         if (dA !== dB) return dB - dA;
         return b.id - a.id;
       });
