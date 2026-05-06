@@ -2158,7 +2158,7 @@
       else if (view === 'sales') html = renderSalesView();
 
       // Navigation bar (Robust Visibility Logic)
-      const isNavHidden = !auth || view === 'new' || editMode;
+      const isNavHidden = !auth || view === 'new' || editMode || view === 'detail';
       if (!isNavHidden) {
         html += `
           <div class="bottom-nav">
