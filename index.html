@@ -57,11 +57,21 @@
       cursor: pointer;
       border: none;
     }
+
     @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.3; }
-      100% { opacity: 1; }
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+
+      100% {
+        opacity: 1;
+      }
     }
+
     .header {
       background: linear-gradient(180deg, #1a1007 0%, #000000 100%);
       border-bottom: 1px solid #2a2010;
@@ -165,6 +175,7 @@
       gap: 10px;
       margin: 16px 0;
     }
+
     .stat-full {
       grid-column: span 2;
     }
@@ -291,6 +302,7 @@
       width: 100%;
       text-align: left !important;
       transition: border-color .2s;
+      height: 44px;
     }
 
     .inp:focus {
@@ -329,53 +341,90 @@
     .flatpickr-calendar {
       background: #111111 !important;
       border: 1px solid #222222 !important;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5) !important;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
     }
-    .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after,
-    .flatpickr-calendar.arrowBottom:before, .flatpickr-calendar.arrowBottom:after {
+
+    .flatpickr-calendar.arrowTop:before,
+    .flatpickr-calendar.arrowTop:after,
+    .flatpickr-calendar.arrowBottom:before,
+    .flatpickr-calendar.arrowBottom:after {
       display: none !important;
     }
+
     .flatpickr-day {
       color: #e8e8e8 !important;
     }
-    .flatpickr-day:hover, .flatpickr-day:focus {
+
+    .flatpickr-day:hover,
+    .flatpickr-day:focus {
       background: #222222 !important;
       border-color: #222222 !important;
     }
-    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange,
+    .flatpickr-day.selected.inRange,
+    .flatpickr-day.startRange.inRange,
+    .flatpickr-day.endRange.inRange,
+    .flatpickr-day.selected:focus,
+    .flatpickr-day.startRange:focus,
+    .flatpickr-day.endRange:focus,
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover,
+    .flatpickr-day.selected.prevMonthDay,
+    .flatpickr-day.startRange.prevMonthDay,
+    .flatpickr-day.endRange.prevMonthDay,
+    .flatpickr-day.selected.nextMonthDay,
+    .flatpickr-day.startRange.nextMonthDay,
+    .flatpickr-day.endRange.nextMonthDay {
       background: #f97316 !important;
       border-color: #f97316 !important;
       color: #000 !important;
       font-weight: bold;
     }
+
     .flatpickr-day.today {
       border-color: #f97316 !important;
     }
-    .flatpickr-day.today:hover, .flatpickr-day.today:focus {
+
+    .flatpickr-day.today:hover,
+    .flatpickr-day.today:focus {
       border-color: #f97316 !important;
       background: #f9731633 !important;
       color: #e8e8e8 !important;
     }
+
     .flatpickr-months .flatpickr-month {
       background: #111111 !important;
       color: #e8e8e8 !important;
       fill: #e8e8e8 !important;
     }
+
     .flatpickr-current-month .flatpickr-monthDropdown-months {
       background: #111111 !important;
       color: #e8e8e8 !important;
     }
+
     .flatpickr-current-month .flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
       background-color: #111111 !important;
     }
+
     .flatpickr-weekday {
       background: #111111 !important;
       color: #aaa !important;
     }
-    .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {
+
+    .flatpickr-months .flatpickr-prev-month:hover svg,
+    .flatpickr-months .flatpickr-next-month:hover svg {
       fill: #f97316 !important;
     }
-    .flatpickr-time input:hover, .flatpickr-time .flatpickr-am-pm:hover, .flatpickr-time input:focus, .flatpickr-time .flatpickr-am-pm:focus {
+
+    .flatpickr-time input:hover,
+    .flatpickr-time .flatpickr-am-pm:hover,
+    .flatpickr-time input:focus,
+    .flatpickr-time .flatpickr-am-pm:focus {
       background: #222222 !important;
     }
 
@@ -643,7 +692,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_FFtC1lxP8uCWuDBFQ1WGOA_N0rZS4rt';
     const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // ------------------------------
-// stages editing code 
+    // stages editing code 
     const STAGE_TEMPLATES = {
       'stone': {
         label: 'Stone Jewelry',
@@ -701,7 +750,7 @@
     function fmtDateUI(s) {
       const d = parseDateObj(s);
       if (isNaN(d)) return s;
-      return d.toLocaleDateString('en-GB', {day:'2-digit', month:'2-digit', year:'2-digit'});
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
     }
     function toInputDate(s) {
       const d = parseDateObj(s);
@@ -798,15 +847,15 @@
     function restoreFromLocal() {
       const cached = localStorage.getItem(LS_KEY_BATCHES);
       if (cached) {
-        try { batches = JSON.parse(cached).map(b => cleanBatch(b)); } catch(e) {}
+        try { batches = JSON.parse(cached).map(b => cleanBatch(b)); } catch (e) { }
       }
       const savedNew = localStorage.getItem(LS_KEY_NEW);
       if (savedNew) {
-        try { newB = JSON.parse(savedNew); } catch(e) {}
+        try { newB = JSON.parse(savedNew); } catch (e) { }
       }
       const savedDraft = localStorage.getItem(LS_KEY_DRAFT);
       if (savedDraft) {
-        try { draft = JSON.parse(savedDraft); } catch(e) {}
+        try { draft = JSON.parse(savedDraft); } catch (e) { }
       }
       const savedState = localStorage.getItem(LS_KEY_STATE);
       if (savedState) {
@@ -815,7 +864,7 @@
           view = s.view || 'list';
           selId = s.selId || null;
           editMode = s.editMode || false;
-        } catch(e) {}
+        } catch (e) { }
       }
     }
 
@@ -824,9 +873,9 @@
         b.stages.forEach(stg => {
           if (!stg.entries) {
             if (stg.cost !== undefined && stg.cost !== null && stg.cost !== '') {
-               stg.entries = [{cost: stg.cost, date: stg.date || ''}];
+              stg.entries = [{ cost: stg.cost, date: stg.date || '' }];
             } else {
-               stg.entries = [];
+              stg.entries = [];
             }
           }
         });
@@ -863,7 +912,9 @@
       } finally {
         loading = false;
       }
-      render();
+      if (!editMode && view !== 'new') {
+        render();
+      }
     }
 
     function setupRealtime() {
@@ -883,7 +934,9 @@
             } else if (payload.eventType === 'DELETE') {
               batches = batches.filter(x => x.id !== payload.old.id);
             }
-            render();
+            if (!editMode && view !== 'new') {
+              render();
+            }
           }
         )
         .subscribe();
@@ -900,7 +953,7 @@
       if (pct > 20 && pct <= 50) clr = '#3b82f6';
       else if (pct > 50 && pct <= 80) clr = '#f97316';
       else if (pct > 80) clr = '#10b981';
-      
+
       const tCost = totalCost(st);
       const avgCost = (tCost > 0 && filled > 0) ? (tCost / filled) : 1;
 
@@ -934,7 +987,7 @@
       const cost = totalCost(b.stages); const sell = totalSalesRevenue(b);
       const profit = sell - cost; const pct = cost ? (profit / cost * 100) : 0; const isP = profit >= 0;
       const clr = isP ? '#10b981' : '#ef4444';
-      
+
       const makingPctOfRev = sell ? (cost / sell * 100) : 0;
       const profitPctOfRev = sell ? (profit / sell * 100) : 0;
 
@@ -1000,7 +1053,7 @@
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const pb30 = pb.filter(b => {
-        const lastSaleDate = (b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : (b.sellingDate || b.date);
+        const lastSaleDate = (b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : (b.sellingDate || b.date);
         const d = parseDateObj(lastSaleDate);
         return !isNaN(d) && d >= thirtyDaysAgo;
       });
@@ -1041,8 +1094,8 @@
         const aComp = ((a.qty > 0 && aSoldQty >= a.qty) || a.sellingDate) ? 1 : 0;
         const bComp = ((b.qty > 0 && bSoldQty >= b.qty) || b.sellingDate) ? 1 : 0;
         if (aComp !== bComp) return aComp - bComp;
-        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj((a.sales && a.sales.length > 0) ? a.sales[a.sales.length-1].date : (a.sellingDate || a.date)).getTime() || 0);
-        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : (b.sellingDate || b.date)).getTime() || 0);
+        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj((a.sales && a.sales.length > 0) ? a.sales[a.sales.length - 1].date : (a.sellingDate || a.date)).getTime() || 0);
+        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj((b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : (b.sellingDate || b.date)).getTime() || 0);
         if (dA !== dB) return dB - dA;
         return b.id - a.id;
       });
@@ -1060,7 +1113,7 @@
                  onmouseup="endPress(event)" 
                  ontouchend="endPress(event)" 
                  oncontextmenu="handleCompContext(event, ${b.id})">
-              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}
+              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : b.sellingDate) : null), false)}
             </div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
@@ -1074,9 +1127,9 @@
       <div class="brand">RANIL JEWELLERS</div>
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="title">Batch Tracker</span>
-        ${loading ? `<span style="font-size:10px; color:#f59e0b; animation:pulse 1.5s infinite;">● Syncing...</span>` : 
-          (syncError ? `<span style="font-size:10px; color:#ef4444; cursor:pointer;" onclick="loadData()">● ${syncError} (Retry)</span>` : 
-          `<span style="font-size:10px; color:#10b981;">● Online</span>`)}
+        ${loading ? `<span style="font-size:10px; color:#f59e0b; animation:pulse 1.5s infinite;">● Syncing...</span>` :
+          (syncError ? `<span style="font-size:10px; color:#ef4444; cursor:pointer;" onclick="loadData()">● ${syncError} (Retry)</span>` :
+            `<span style="font-size:10px; color:#10b981;">● Online</span>`)}
       </div>
     </div>
     <button class="new-btn" onclick="goNew()">+ New Batch</button>
@@ -1121,12 +1174,12 @@
     </div>
     <div class="card">
       <div class="flex2">
-        <div><label class="lbl">START DATE</label><input class="inp fp-date" type="text" data-placeholder="Select Date" placeholder="Select Date" value="${toInputDate(nd.date)}" oninput="nd_set('date',this.value);"/></div>
+        <div><label class="lbl">START DATE</label><input class="inp fp-date" type="text" data-placeholder="Select Date" placeholder="Select Date" value="${toInputDate(nd.date)}" readonly /></div>
         <div><label class="lbl">TOTAL QTY (pcs)</label><input class="inp" type="number" placeholder="0" value="${nd.qty}" oninput="nd_set('qty',this.value)"/></div>
       </div>
       <div style="margin-top:12px">
         <label class="lbl">COMPLETION DATE (marks green)</label>
-        <input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(nd.sellingDate)}" oninput="nd_set('sellingDate',this.value);"/>
+        <input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(nd.sellingDate)}" readonly />
       </div>
     </div>
     <div class="card">
@@ -1143,7 +1196,7 @@
       <div style="margin-bottom:12px;">
       ${(!nd.stages || nd.stages.length === 0) ? `<div class="empty" style="padding:20px 0;font-size:11px;">No stages added.</div>` : nd.stages.map((stg, i) => {
         const clr = STAGE_COLORS[i % STAGE_COLORS.length];
-        const entries = stg.entries || [{cost:'', date:''}];
+        const entries = stg.entries || [{ cost: '', date: '' }];
         const entriesHTML = entries.map((ent, eIdx) => `
           <div style="width:100%; display:flex; flex-direction:column; gap:6px; padding-left:16px; margin-top:10px; padding-bottom:10px; border-bottom:1px solid #222;">
             <input class="inp-sm" style="width:100%; padding:8px 10px;" type="text" placeholder="Description (Labor, Polish etc.)" value="${ent.note || ''}" oninput="updateStageNote(false, ${i}, ${eIdx}, this.value)" />
@@ -1154,7 +1207,7 @@
             </div>
           </div>
         `).join('');
-        
+
         return `<div class="srow" style="flex-wrap:wrap; gap:8px;">
           <div style="width:100%; display:flex; align-items:center; gap:8px;">
             <div style="width:8px;height:8px;border-radius:50%;background:${clr};flex-shrink:0"></div>
@@ -1210,7 +1263,7 @@
         const has = hasStageCost(stg);
         const sCost = getStageCost(stg);
         const clr = STAGE_COLORS[i % STAGE_COLORS.length];
-        const entries = stg.entries || [{cost:'', date:''}];
+        const entries = stg.entries || [{ cost: '', date: '' }];
 
         if (editMode) {
           const entriesHTML = entries.map((ent, eIdx) => `
@@ -1254,8 +1307,8 @@
         </div>
         ${has ? `<div style="width:100%; padding-left:42px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:monospace; margin-top:4px; margin-bottom:4px;">
           <div style="display:flex; align-items:center;">
-            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px; letter-spacing:0.5px; width:110px; display:inline-block; margin-right:10px;">₹${(parseFloat(sCost)/parseFloat(d.qty)).toFixed(2)}/pc</span>` : (has ? `<span style="width:110px; display:inline-block; margin-right:10px;"></span>` : '')}
-            ${(has && cost > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px;">${((parseFloat(sCost)/cost)*100).toFixed(1)}%</span>` : ''}
+            ${(has && d.qty && parseFloat(d.qty) > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px; letter-spacing:0.5px; width:110px; display:inline-block; margin-right:10px;">₹${(parseFloat(sCost) / parseFloat(d.qty)).toFixed(2)}/pc</span>` : (has ? `<span style="width:110px; display:inline-block; margin-right:10px;"></span>` : '')}
+            ${(has && cost > 0) ? `<span style="color:#3b82f6; font-weight:800; font-size:13px;">${((parseFloat(sCost) / cost) * 100).toFixed(1)}%</span>` : ''}
           </div>
         </div>` : ''}
         ${viewEntriesHTML}
@@ -1284,9 +1337,9 @@
     </div>
     `}
     <div style="font-family:monospace;font-size:11px;color:#666;letter-spacing:1.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
-      ${editMode 
-        ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
-        : `<span>START: ${fmtDateUI(d.date)}</span>`}
+      ${editMode
+          ? `<div style="display:flex;align-items:center;gap:8px;"><span>START:</span> <input type="text" class="inp fp-date header-date-inp" data-placeholder="Start Date" placeholder="Start Date" value="${toInputDate(d.date)}" oninput="dr_set('date',this.value);"/></div>`
+          : `<span>START: ${fmtDateUI(d.date)}</span>`}
       ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
     ${profitCardHTML(d)}
@@ -1308,13 +1361,13 @@
       <div style="font-family:monospace; font-size:12px; color:#aaa; margin-bottom:12px;">
         ${totalSoldQty(d)}/${d.qty || 0} pieces sold
         <div style="width:100%; height:4px; background:#222; border-radius:2px; margin-top:6px; overflow:hidden;">
-          <div style="width:${Math.min(100, (totalSoldQty(d)/(d.qty||1))*100)}%; height:100%; background:#f59e0b;"></div>
+          <div style="width:${Math.min(100, (totalSoldQty(d) / (d.qty || 1)) * 100)}%; height:100%; background:#f59e0b;"></div>
         </div>
       </div>
       
       ${(!d.sales || d.sales.length === 0) ? `<div class="empty" style="padding:10px 0;">No sales recorded yet.</div>` : d.sales.map((sale, si) => {
-        if (editMode) {
-          return `<div style="padding:12px; background:#111; border-radius:8px; margin-bottom:8px; border:1px solid #222;">
+            if (editMode) {
+              return `<div style="padding:12px; background:#111; border-radius:8px; margin-bottom:8px; border:1px solid #222;">
             <div style="display:flex; gap:8px; margin-bottom:8px;">
               <div style="flex:1;"><label class="lbl">QTY</label><input class="inp-sm" style="width:100%;" type="number" value="${sale.qty}" oninput="updateSale(true, ${si}, 'qty', this.value)"/></div>
               <div style="flex:2;"><label class="lbl">PRICE (₹)</label><input class="inp-sm" style="width:100%;" type="number" value="${sale.price}" oninput="updateSale(true, ${si}, 'price', this.value)"/></div>
@@ -1325,19 +1378,19 @@
               <div style="flex:1;"><label class="lbl">STORE</label><input class="inp-sm" style="width:100%;" type="text" placeholder="Store name" value="${sale.store || ''}" oninput="updateSale(true, ${si}, 'store', this.value)"/></div>
             </div>
           </div>`;
-        } else {
-          return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #111;">
+            } else {
+              return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #111;">
             <div>
               <div style="font-weight:700; font-size:14px; color:#f59e0b;">₹${fmt(sale.price)}</div>
               <div style="font-size:11px; color:#666; font-family:monospace;">${sale.qty} pcs to ${sale.store || '—'}</div>
             </div>
             <div style="text-align:right;">
               <div style="font-family:monospace; font-size:11px; color:#aaa;">${fmtDateUI(sale.date)}</div>
-              <div style="font-family:monospace; font-size:10px; color:#666;">₹${(sale.price/sale.qty).toFixed(2)}/pc</div>
+              <div style="font-family:monospace; font-size:10px; color:#666;">₹${(sale.price / sale.qty).toFixed(2)}/pc</div>
             </div>
           </div>`;
-        }
-      }).join('')}
+            }
+          }).join('')}
     </div>
     <div class="card">
       <div class="clbl">BATCH INFO</div>
@@ -1431,11 +1484,12 @@
       render();
     }
     function openDetail(id) { selId = id; editMode = false; draft = null; view = 'detail'; saveToLocal(); render(); }
-    function startEdit() { const b = batches.find(x => x.id === selId); 
+    function startEdit() {
+      const b = batches.find(x => x.id === selId);
       draft = JSON.parse(JSON.stringify(b));
       editMode = true;
       saveToLocal();
-      render(); 
+      render();
     }
     function cancelEdit() { editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render(); }
     async function saveEdit() {
@@ -1443,19 +1497,19 @@
       try {
         isSaving = true;
         render(); // Show "Saving..."
-        
+
         const updatedB = JSON.parse(JSON.stringify(draft));
         delete updatedB.template;
 
         const { error } = await sbClient.from('batches').update(updatedB).eq('id', updatedB.id);
         if (error) throw error;
-        
+
         batches = batches.map(b => b.id === selId ? { ...draft } : b);
         localStorage.setItem(LS_KEY_BATCHES, JSON.stringify(batches));
-        
+
         isSaving = 'done';
         render();
-        
+
         setTimeout(() => {
           editMode = false;
           draft = null;
@@ -1492,7 +1546,7 @@
         const sell = totalSalesRevenue(b);
         const profit = sell - cost;
         const margin = cost ? ((profit / cost) * 100).toFixed(2) : 0;
-        const lastSaleDate = (b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : '';
+        const lastSaleDate = (b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : '';
         return [
           b.id,
           `"${(b.name || '').replace(/"/g, '""')}"`,
@@ -1529,8 +1583,8 @@
         const aComp = ((a.qty > 0 && aSoldQty >= a.qty) || a.sellingDate) ? 1 : 0;
         const bComp = ((b.qty > 0 && bSoldQty >= b.qty) || b.sellingDate) ? 1 : 0;
         if (aComp !== bComp) return aComp - bComp;
-        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj((a.sales && a.sales.length > 0) ? a.sales[a.sales.length-1].date : (a.sellingDate || a.date)).getTime() || 0);
-        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : (b.sellingDate || b.date)).getTime() || 0);
+        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj((a.sales && a.sales.length > 0) ? a.sales[a.sales.length - 1].date : (a.sellingDate || a.date)).getTime() || 0);
+        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj((b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : (b.sellingDate || b.date)).getTime() || 0);
         if (dA !== dB) return dB - dA;
         return b.id - a.id;
       });
@@ -1548,7 +1602,7 @@
                  onmouseup="endPress(event)" 
                  ontouchend="endPress(event)" 
                  oncontextmenu="handleCompContext(event, ${b.id})">
-              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}
+              ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : b.sellingDate) : null), false)}
             </div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
@@ -1644,7 +1698,7 @@
     }
 
     function startCompPress(e, id) {
-      if(editMode) return;
+      if (editMode) return;
       e.stopPropagation();
       const el = e.currentTarget;
       el.style.backgroundColor = '#1a1a1a';
@@ -1654,13 +1708,13 @@
       }, 800);
     }
     function handleCompContext(e, id) {
-      if(editMode) return;
+      if (editMode) return;
       e.preventDefault(); e.stopPropagation();
       endPress(e);
       triggerQuickComp(id);
     }
     function triggerQuickComp(id) {
-      if(editMode) return;
+      if (editMode) return;
       quickAddCompId = id;
       render();
     }
@@ -1671,7 +1725,7 @@
       if (!b) return;
       const date = document.getElementById('qc_date').value;
       if (!date) { alert('Select a date'); return; }
-      
+
       const updatedB = { ...b, sellingDate: date };
       // Optimistic Update
       batches = batches.map(x => x.id === b.id ? updatedB : x);
@@ -1726,7 +1780,7 @@
     }
 
     function startPress(e, idx) {
-      if(editMode) return;
+      if (editMode) return;
       const el = e.currentTarget;
       el.style.backgroundColor = '#1a1a1a';
       longPressTimer = setTimeout(() => {
@@ -1736,16 +1790,16 @@
     }
     function endPress(e) {
       clearTimeout(longPressTimer);
-      if(e.currentTarget) e.currentTarget.style.backgroundColor = '';
+      if (e.currentTarget) e.currentTarget.style.backgroundColor = '';
     }
     function handleContext(e, idx) {
-      if(editMode) return;
+      if (editMode) return;
       e.preventDefault();
       endPress(e);
       triggerQuickAdd(idx);
     }
     function triggerQuickAdd(idx) {
-      if(editMode) return;
+      if (editMode) return;
       quickAddStageIdx = idx;
       render();
     }
@@ -1765,11 +1819,11 @@
       if (!updatedB.stages[quickAddStageIdx].entries) {
         updatedB.stages[quickAddStageIdx].entries = [];
         if (updatedB.stages[quickAddStageIdx].cost !== undefined && updatedB.stages[quickAddStageIdx].cost !== '') {
-           updatedB.stages[quickAddStageIdx].entries.push({cost: updatedB.stages[quickAddStageIdx].cost, date: updatedB.stages[quickAddStageIdx].date || ''});
+          updatedB.stages[quickAddStageIdx].entries.push({ cost: updatedB.stages[quickAddStageIdx].cost, date: updatedB.stages[quickAddStageIdx].date || '' });
         }
       }
       updatedB.stages[quickAddStageIdx].entries.push({ cost: amt, date: dt, note: note });
-      
+
       // Optimistic Update
       batches = batches.map(x => x.id === updatedB.id ? updatedB : x);
       quickAddStageIdx = null;
@@ -1798,16 +1852,16 @@
       try {
         isSaving = true;
         render(); // Immediately show "Saving..." state
-        
+
         const { error } = await sbClient.from('batches').insert([newBatch]);
         if (error) throw error;
-        
+
         batches = [newBatch, ...batches];
         localStorage.setItem(LS_KEY_BATCHES, JSON.stringify(batches));
-        
+
         isSaving = 'done';
         render();
-        
+
         setTimeout(() => {
           newB = null;
           clearLocal(LS_KEY_NEW);
@@ -1826,8 +1880,8 @@
 
     function renderProfitEngine() {
       const today = new Date();
-      today.setHours(0,0,0,0);
-      
+      today.setHours(0, 0, 0, 0);
+
       const getProfit = (daysStart, daysEnd) => {
         const dStart = new Date(today); dStart.setDate(dStart.getDate() - daysStart);
         const dEnd = new Date(today); dEnd.setDate(dEnd.getDate() - daysEnd);
@@ -1835,9 +1889,9 @@
           if (!b.sellingDate || totalSalesRevenue(b) <= 0) return false;
           const d = parseDateObj(b.sellingDate);
           return !isNaN(d) && d >= dStart && d < dEnd;
-        }).reduce((s, b) => { 
-          const c = totalCost(b.stages), sp = totalSalesRevenue(b); 
-          return s + (sp - c); 
+        }).reduce((s, b) => {
+          const c = totalCost(b.stages), sp = totalSalesRevenue(b);
+          return s + (sp - c);
         }, 0);
       };
 
@@ -1876,7 +1930,7 @@
         activeDays = 1;
       }
       const avgDailyProfit30 = netProfit30 / activeDays;
-      
+
       let velocityDays = '—';
       if (avgDailyProfit30 > 0) {
         velocityDays = Math.ceil(100000 / avgDailyProfit30) + ' Days';
@@ -1976,7 +2030,7 @@
               </div>
               <div style="text-align:right">
                 <div style="font-weight:700;font-size:16px;color:#10b981;">₹${fmt(s.price)}</div>
-                <div style="font-family:monospace;font-size:11px;color:#aaa;margin-top:2px;">${s.qty} pcs @ ₹${(s.price/s.qty).toFixed(2)}</div>
+                <div style="font-family:monospace;font-size:11px;color:#aaa;margin-top:2px;">${s.qty} pcs @ ₹${(s.price / s.qty).toFixed(2)}</div>
               </div>
             </div>
           </div>
@@ -2001,10 +2055,10 @@
             <div class="srow" style="padding:12px; border:1px solid #222; border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="quickAddSaleBatchId=${b.id};render()">
               <div style="font-family:monospace; font-size:11px; color:#aaa;">#${b.id}</div>
               <div style="font-weight:bold;">${b.name}</div>
-              <div style="font-size:11px; color:#f59e0b;">${(parseFloat(b.qty)||0) - totalSoldQty(b)} pieces remaining</div>
+              <div style="font-size:11px; color:#f59e0b;">${(parseFloat(b.qty) || 0) - totalSoldQty(b)} pieces remaining</div>
             </div>
           `).join('');
-          
+
         return `<div class="overlay" onclick="quickAddSaleBatchId=null;render()">
           <div class="sheet" onclick="event.stopPropagation()" style="max-height:80vh; overflow-y:auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -2018,7 +2072,7 @@
         // Step 2: Enter Sale Details
         const b = batches.find(x => x.id === quickAddSaleBatchId);
         if (!b) return '';
-        const rem = (parseFloat(b.qty)||0) - totalSoldQty(b);
+        const rem = (parseFloat(b.qty) || 0) - totalSoldQty(b);
         return `<div class="overlay" onclick="quickAddSaleBatchId=null;render()">
           <div class="sheet" onclick="event.stopPropagation()">
             <h3>Add Sale for ${b.name}</h3>
@@ -2058,7 +2112,7 @@
       const store = document.getElementById('qs_store').value;
 
       if (!qty || !price) { alert('Enter quantity and price'); return; }
-      const rem = (parseFloat(b.qty)||0) - totalSoldQty(b);
+      const rem = (parseFloat(b.qty) || 0) - totalSoldQty(b);
       if (qty > rem) { alert('Quantity exceeds remaining stock!'); return; }
 
       const updatedB = JSON.parse(JSON.stringify(b));
@@ -2095,7 +2149,7 @@
       else if (view === 'profit_engine') html = renderProfitEngine();
       else if (view === 'inventory') html = renderInventoryView();
       else if (view === 'sales') html = renderSalesView();
-      
+
       if (auth && (view === 'list' || view === 'graph' || view === 'profit_engine' || view === 'inventory' || view === 'sales')) {
         html += `
           <div class="bottom-nav">
@@ -2122,44 +2176,50 @@
           </div>
         `;
       }
-      
+
       if (quickAddCompId !== null) html += renderQuickCompOverlay();
       document.getElementById('app').innerHTML = html;
-      
-      setTimeout(() => {
-        if (view === 'graph' && typeof initCharts === 'function') {
-          initCharts(batches);
-        }
-        flatpickr('.fp-date', {
+
+      if (view === 'graph' && typeof initCharts === 'function') {
+        initCharts(batches);
+      }
+      // Initialize pickers
+      document.querySelectorAll('.fp-date').forEach(el => {
+        if (el._flatpickr) return;
+        flatpickr(el, {
           dateFormat: "Y-m-d",
           altInput: true,
           altFormat: "d-m-Y",
           disableMobile: true,
-          onChange: function(selectedDates, dateStr, instance) {
-            instance.element.value = dateStr;
-            instance.element.dispatchEvent(new Event('input', { bubbles: true }));
+          allowInput: false,
+          onChange: function (selectedDates, dateStr, instance) {
+            if (view === 'new') nd_set('date', dateStr);
+            else if (editMode) dr_set('date', dateStr);
+            else {
+              instance.element.value = dateStr;
+            }
           }
         });
-      }, 0);
+      });
     }
 
     render();
     loadData();
 
-    if ('serviceWorker' in navigator) { 
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => {
         reg.onupdatefound = () => {
           const installingWorker = reg.installing;
           installingWorker.onstatechange = () => {
             if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // New update available
-              if(confirm('New version available! Reload to update?')) {
+              if (confirm('New version available! Reload to update?')) {
                 window.location.reload();
               }
             }
           };
         };
-      }).catch(() => { }); 
+      }).catch(() => { });
     }
   </script>
 </body>
