@@ -644,6 +644,41 @@
     const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // ------------------------------
 
+    const STAGE_TEMPLATES = {
+      'stone': {
+        label: 'Stone Jewelry',
+        stages: [
+          { name: 'Casting', entries: [{ cost: '', date: '' }] },
+          { name: 'Runner', entries: [{ cost: '', date: '' }] },
+          { name: 'Cutting', entries: [{ cost: '', date: '' }] },
+          { name: 'Stone', entries: [{ cost: '', date: '' }] },
+          { name: 'Fitting', entries: [{ cost: '', date: '' }] },
+          { name: 'Plating', entries: [{ cost: '', date: '' }] }
+        ]
+      },
+      // 'plain': {
+      //   label: 'Plain Jewelry',
+      //   stages: [
+      //     { name: 'Casting', entries: [{ cost: '', date: '' }] },
+      //     { name: 'Runner', entries: [{ cost: '', date: '' }] },
+      //     { name: 'Fitting', entries: [{ cost: '', date: '' }] },
+      //     { name: 'Plating', entries: [{ cost: '', date: '' }] }
+      //   ]
+      // },
+      'Impon Jewelry': {
+        label: 'Impon Jewelry',
+        stages: [
+          { name: 'Metal', entries: [{ cost: '', date: '' }] },
+          { name: 'Making', entries: [{ cost: '', date: '' }] },
+          { name: 'Plating', entries: [{ cost: '', date: '' }] }
+        ]
+      },
+      'empty': {
+        label: 'Custom / Empty',
+        stages: []
+      }
+    };
+
     const STAGE_COLORS = ['#fb923c', '#f97316', '#ea580c', '#c2410c', '#f59e0b', '#d97706', '#b45309', '#9a3412'];
 
     function fmt(n) { return Number(n).toLocaleString('en-IN'); }
@@ -1095,6 +1130,12 @@
       </div>
     </div>
     <div class="card">
+      <div style="margin-bottom:12px;">
+        <label class="lbl">STAGE TEMPLATE</label>
+        <select class="inp" style="background:#111; color:#f59e0b; border-color:#f59e0b33; font-weight:bold;" onchange="applyStageTemplate(this.value)">
+          ${Object.entries(STAGE_TEMPLATES).map(([k, v]) => `<option value="${k}" ${nd.template === k ? 'selected' : ''}>${v.label}</option>`).join('')}
+        </select>
+      </div>
       <div class="clbl" style="display:flex; justify-content:space-between; align-items:center;">
         <span>STAGES & COSTS</span>
         <button class="btn-edit" onclick="addStage(false)">+ Add Stage</button>
@@ -1372,17 +1413,20 @@
         date: new Date().toLocaleDateString('en-CA'),
         qty: '',
         sellingDate: '',
+        template: 'stone',
         sales: [],
-        stages: [
-          { name: 'Casting', entries: [{ cost: '', date: '' }] },
-          { name: 'Runner', entries: [{ cost: '', date: '' }] },
-          { name: 'Cutting', entries: [{ cost: '', date: '' }] },
-          { name: 'Stone', entries: [{ cost: '', date: '' }] },
-          { name: 'Fitting', entries: [{ cost: '', date: '' }] },
-          { name: 'Plating', entries: [{ cost: '', date: '' }] }
-        ]
+        stages: JSON.parse(JSON.stringify(STAGE_TEMPLATES['stone'].stages))
       };
       view = 'new';
+      saveToLocal();
+      render();
+    }
+
+    function applyStageTemplate(key) {
+      if (!STAGE_TEMPLATES[key]) return;
+      if (newB.stages.length > 0 && !confirm('This will replace current stages. Continue?')) return;
+      newB.template = key;
+      newB.stages = JSON.parse(JSON.stringify(STAGE_TEMPLATES[key].stages));
       saveToLocal();
       render();
     }
