@@ -39,7 +39,11 @@ function initCharts(batches) {
   // Helper functions assumed to exist in index.html global scope
   const _parseDate = typeof parseDateObj === 'function' ? parseDateObj : (s => new Date(s));
   const _totalCost = typeof totalCost === 'function' ? totalCost : (() => 0);
-  const _totalSalesRevenue = typeof totalSalesRevenue === 'function' ? totalSalesRevenue : (b => parseFloat(b.sellingPrice) || 0);
+  const _totalSalesRevenue = (b) => {
+    if (typeof totalSalesRevenue === 'function') return totalSalesRevenue(b);
+    if (!b.sales || !Array.isArray(b.sales)) return parseFloat(b.sellingPrice) || 0;
+    return b.sales.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0);
+  };
 
   // Filter completed batches (those with a selling date and recorded revenue)
   const completed = batches.filter(b => b.sellingDate && _totalSalesRevenue(b) > 0);
