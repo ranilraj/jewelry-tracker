@@ -694,6 +694,7 @@
     let batches = [];
     let view = 'list';
     let selId = null;
+    let lastViewToken = null;
     let editMode = false;
     let draft = null;
     let newB = null;
@@ -1484,6 +1485,11 @@
     }
 
     function render() {
+      const currentToken = view + (selId || '');
+      if (lastViewToken !== currentToken) {
+        window.scrollTo(0, 0);
+        lastViewToken = currentToken;
+      }
       let html = '';
       if (!auth) html = renderLogin();
       else if (view === 'list') html = renderList();
