@@ -894,6 +894,9 @@
         return !isNaN(d) && d >= thirtyDaysAgo;
       });
       const spend30 = all30.reduce((s, b) => s + totalCost(b.stages), 0);
+      const costOfSold30 = pb30.reduce((s, b) => s + totalCost(b.stages), 0);
+      const profitPctOfRev30 = revenue30 ? (netProfit30 / revenue30 * 100) : 0;
+      const makingPctOfRev30 = revenue30 ? (costOfSold30 / revenue30 * 100) : 0;
       const avg30 = pb30.length ? pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = totalSalesRevenue(b); return s + ((sp - c) / c * 100); }, 0) / pb30.length : 0;
 
       const filteredBatches = batches.filter(b => {
@@ -943,8 +946,10 @@
     <div class="stats" style="margin-bottom:24px;">
       <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">30D REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(revenue30)}</div></div>
       <div class="stat"><div class="stat-lbl">30D SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend30)}</div></div>
-      <div class="stat"><div class="stat-lbl">30D AVG MARGIN</div><div class="stat-val" style="color:${avg30 >= 0 ? '#10b981' : '#ef4444'}">${avg30.toFixed(1)}%</div></div>
       <div class="stat"><div class="stat-lbl">30D NET PROFIT</div><div class="stat-val" style="color:${netProfit30 >= 0 ? '#10b981' : '#ef4444'}">${netProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(netProfit30))}</div></div>
+      <div class="stat"><div class="stat-lbl">PROFIT % OF REV</div><div class="stat-val" style="color:#10b981">${profitPctOfRev30.toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-lbl">MAKING % OF REV</div><div class="stat-val" style="color:#3b82f6">${makingPctOfRev30.toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-lbl">30D AVG MARGIN</div><div class="stat-val" style="color:${avg30 >= 0 ? '#10b981' : '#ef4444'}">${avg30.toFixed(1)}%</div></div>
       <div class="stat"><div class="stat-lbl">DAILY AVG PROFIT</div><div class="stat-val" style="color:${avgDailyProfit30 >= 0 ? '#10b981' : '#ef4444'}">${avgDailyProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(avgDailyProfit30))}</div></div>
     </div>
 
