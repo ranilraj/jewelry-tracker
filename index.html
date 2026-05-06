@@ -718,7 +718,43 @@
     let quickAddSaleBatchId = null;
     let quickAddCompId = null;
 
+    // Local Persistence
+    const LS_KEY_DRAFT = 'jewelry_draft_edit';
+    const LS_KEY_NEW = 'jewelry_draft_new';
+    const LS_KEY_STATE = 'jewelry_app_state';
+
+    function saveToLocal() {
+      if (draft) localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(draft));
+      if (newB) localStorage.setItem(LS_KEY_NEW, JSON.stringify(newB));
+      localStorage.setItem(LS_KEY_STATE, JSON.stringify({ view, selId, editMode }));
+    }
+
+    function clearLocal(key) {
+      localStorage.removeItem(key);
+    }
+
+    function restoreFromLocal() {
+      const savedNew = localStorage.getItem(LS_KEY_NEW);
+      if (savedNew) {
+        try { newB = JSON.parse(savedNew); } catch(e) {}
+      }
+      const savedDraft = localStorage.getItem(LS_KEY_DRAFT);
+      if (savedDraft) {
+        try { draft = JSON.parse(savedDraft); } catch(e) {}
+      }
+      const savedState = localStorage.getItem(LS_KEY_STATE);
+      if (savedState) {
+        try {
+          const s = JSON.parse(savedState);
+          view = s.view || 'list';
+          selId = s.selId || null;
+          editMode = s.editMode || false;
+        } catch(e) {}
+      }
+    }
+
     async function loadData() {
+      restoreFromLocal();
       try {
         const { data, error } = await sbClient
           .from('batches')
@@ -1251,14 +1287,35 @@
     }
 
     // Actions
-    function goList() { view = 'list'; selId = null; editMode = false; draft = null; delConf = false; render(); }
+    function goList() { view = 'list'; selId = null; editMode = false; draft = null; delConf = false; clearLocal(LS_KEY_STATE); clearLocal(LS_KEY_DRAFT); clearLocal(LS_KEY_NEW); render(); }
     function goNew() {
-      newB = { name: '', date: new Date().toLocaleDateString('en-CA'), qty: '', stages: [], sales: [], sellingDate: '', notes: '' };
-      view = 'new'; render();
+      newB = {
+        name: '',
+        date: new Date().toLocaleDateString('en-CA'),
+        qty: '',
+        sellingDate: '',
+        sales: [],
+        stages: [
+          { name: 'Casting', entries: [{ cost: '', date: '' }] },
+          { name: 'Runner', entries: [{ cost: '', date: '' }] },
+          { name: 'Cutting', entries: [{ cost: '', date: '' }] },
+          { name: 'Stone', entries: [{ cost: '', date: '' }] },
+          { name: 'Fitting', entries: [{ cost: '', date: '' }] },
+          { name: 'Plating', entries: [{ cost: '', date: '' }] }
+        ]
+      };
+      view = 'new';
+      saveToLocal();
+      render();
     }
-    function openDetail(id) { selId = id; editMode = false; draft = null; view = 'detail'; render(); }
-    function startEdit() { const b = batches.find(x => x.id === selId); draft = { ...b, stages: JSON.parse(JSON.stringify(b.stages)) }; editMode = true; render(); }
-    function cancelEdit() { editMode = false; draft = null; render(); }
+    function openDetail(id) { selId = id; editMode = false; draft = null; view = 'detail'; saveToLocal(); render(); }
+    function startEdit() { const b = batches.find(x => x.id === selId); 
+      draft = JSON.parse(JSON.stringify(b));
+      editMode = true;
+      saveToLocal();
+      render(); 
+    }
+    function cancelEdit() { editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render(); }
     async function saveEdit() {
       if (isSaving) return;
       try {
@@ -1266,7 +1323,7 @@
         const { error } = await sbClient.from('batches').update(draft).eq('id', draft.id);
         if (error) throw error;
         batches = batches.map(b => b.id === selId ? { ...draft } : b);
-        editMode = false; draft = null; render();
+        editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render();
       } catch (err) {
         console.error('Error saving edit:', err);
         alert('Failed to save to database. Check console for details.');
@@ -1363,29 +1420,33 @@
       if (container) container.innerHTML = cards;
     }
 
-    function nd_set(k, v) { if (newB) newB[k] = v; }
-    function dr_set(k, v) { if (draft) draft[k] = v; }
+    function nd_set(k, v) { if (newB) { newB[k] = v; saveToLocal(); } }
+    function dr_set(k, v) { if (draft) { draft[k] = v; saveToLocal(); } }
 
     function addStage(isDraft) {
       const target = isDraft ? draft : newB;
       if (!target.stages) target.stages = [];
       target.stages.push({ name: '', entries: [{ cost: '', date: '' }] });
+      saveToLocal();
       render();
     }
     function removeStage(isDraft, idx) {
       if (!confirm('Are you sure you want to delete this entire stage?')) return;
       const target = isDraft ? draft : newB;
       target.stages.splice(idx, 1);
+      saveToLocal();
       render();
     }
     function updateStageName(isDraft, idx, val) {
       const target = isDraft ? draft : newB;
       target.stages[idx].name = val;
+      saveToLocal();
     }
     function addStageEntry(isDraft, idx) {
       const target = isDraft ? draft : newB;
       if (!target.stages[idx].entries) target.stages[idx].entries = [];
       target.stages[idx].entries.push({ cost: '', date: '' });
+      saveToLocal();
       render();
     }
     function removeStageEntry(isDraft, stageIdx, entryIdx) {
@@ -1397,22 +1458,26 @@
           target.stages[stageIdx].entries.push({ cost: '', date: '' });
         }
       }
+      saveToLocal();
       render();
     }
     function updateStageCost(isDraft, stageIdx, entryIdx, val) {
       const target = isDraft ? draft : newB;
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '' }];
       target.stages[stageIdx].entries[entryIdx].cost = val;
+      saveToLocal();
     }
     function updateStageDate(isDraft, stageIdx, entryIdx, val) {
       const target = isDraft ? draft : newB;
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '' }];
       target.stages[stageIdx].entries[entryIdx].date = val;
+      saveToLocal();
     }
     function updateStageNote(isDraft, stageIdx, entryIdx, val) {
       const target = isDraft ? draft : newB;
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '', note: '' }];
       target.stages[stageIdx].entries[entryIdx].note = val;
+      saveToLocal();
     }
 
     function addSale(isDraft) {
@@ -1420,6 +1485,7 @@
       if (!target) return;
       if (!target.sales) target.sales = [];
       target.sales.push({ qty: '', price: '', date: new Date().toLocaleDateString('en-CA'), store: '' });
+      saveToLocal();
       render();
     }
     function removeSale(isDraft, idx) {
@@ -1427,12 +1493,14 @@
       const target = isDraft ? draft : (view === 'new' ? newB : null);
       if (!target) return;
       target.sales.splice(idx, 1);
+      saveToLocal();
       render();
     }
     function updateSale(isDraft, idx, key, val) {
       const target = isDraft ? draft : (view === 'new' ? newB : null);
       if (!target) return;
       target.sales[idx][key] = val;
+      saveToLocal();
     }
 
     function startCompPress(e, id) {
@@ -1569,10 +1637,13 @@
 
       try {
         isSaving = true;
-        const { error } = await sbClient.from('batches').insert([newBatch]);
+        const { data, error } = await sbClient.from('batches').insert([newBatch]).select();
         if (error) throw error;
-        batches = [newBatch, ...batches];
-        view = 'list'; render();
+        batches = [data[0], ...batches];
+        newB = null;
+        clearLocal(LS_KEY_NEW);
+        view = 'list';
+        render();
       } catch (err) {
         console.error('Error creating batch:', err);
         alert('Failed to save to database. Check console for details.');
