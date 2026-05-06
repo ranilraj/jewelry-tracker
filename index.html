@@ -145,6 +145,7 @@
 
     .bottom-nav {
       position: fixed;
+      bottom: 16px; /* Fallback for older browsers */
       bottom: calc(16px + env(safe-area-inset-bottom));
       left: 16px;
       right: 16px;
@@ -158,6 +159,7 @@
       padding: 12px 0;
       z-index: 1000;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
     }
 
     .nav-item {
@@ -2155,7 +2157,9 @@
       else if (view === 'inventory') html = renderInventoryView();
       else if (view === 'sales') html = renderSalesView();
 
-      if (auth && (view === 'list' || view === 'graph' || view === 'profit_engine' || view === 'inventory' || view === 'sales')) {
+      // Navigation bar (Robust Visibility Logic)
+      const isNavHidden = !auth || view === 'new' || editMode;
+      if (!isNavHidden) {
         html += `
           <div class="bottom-nav">
             <div class="nav-item ${view === 'list' ? 'active' : ''}" onclick="view='list';render()">
