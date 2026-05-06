@@ -723,10 +723,14 @@
     const LS_KEY_NEW = 'jewelry_draft_new';
     const LS_KEY_STATE = 'jewelry_app_state';
 
+    let lsTimer = null;
     function saveToLocal() {
-      if (draft) localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(draft));
-      if (newB) localStorage.setItem(LS_KEY_NEW, JSON.stringify(newB));
-      localStorage.setItem(LS_KEY_STATE, JSON.stringify({ view, selId, editMode }));
+      if (lsTimer) clearTimeout(lsTimer);
+      lsTimer = setTimeout(() => {
+        if (draft) localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(draft));
+        if (newB) localStorage.setItem(LS_KEY_NEW, JSON.stringify(newB));
+        localStorage.setItem(LS_KEY_STATE, JSON.stringify({ view, selId, editMode }));
+      }, 500); // Debounce 500ms
     }
 
     function clearLocal(key) {
@@ -1637,11 +1641,13 @@
 
       try {
         isSaving = true;
-        const { data, error } = await sbClient.from('batches').insert([newBatch]).select();
+        render(); // Immediately show "Saving..." state
+        const { error } = await sbClient.from('batches').insert([newBatch]);
         if (error) throw error;
-        batches = [data[0], ...batches];
+        batches = [newBatch, ...batches];
         newB = null;
         clearLocal(LS_KEY_NEW);
+        clearLocal(LS_KEY_STATE);
         view = 'list';
         render();
       } catch (err) {
