@@ -1984,7 +1984,7 @@
 
     function renderInventoryView() {
       const unsold = batches.filter(b => b.sellingDate && totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
-      const cards = unsold.length === 0 ? `<div class="empty">No unsold inventory.</div>` :
+      const cards = unsold.length === 0 ? `<div class="empty">Everything is sold out</div>` :
         unsold.map(b => {
           const remaining = (parseFloat(b.qty) || 0) - totalSoldQty(b);
           return `<div class="bcard" onclick="openDetail(${b.id})">
@@ -2003,7 +2003,7 @@
         }).join('');
 
       return `<div class="header">
-        <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Inventory (Unsold)</div></div>
+        <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Inventory</div></div>
       </div>
       <div class="content" style="padding-top:16px">${cards}</div>`;
     }
