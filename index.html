@@ -1563,16 +1563,19 @@
       if (!date) { alert('Select a date'); return; }
       
       const updatedB = { ...b, sellingDate: date };
+      // Optimistic Update
+      batches = batches.map(x => x.id === b.id ? updatedB : x);
+      quickAddCompId = null;
+      render();
+
       try {
         isSaving = true;
         const { error } = await sbClient.from('batches').update(updatedB).eq('id', b.id);
         if (error) throw error;
-        batches = batches.map(x => x.id === b.id ? updatedB : x);
-        quickAddCompId = null;
-        render();
       } catch (err) {
         console.error('Error saving quick completion:', err);
-        alert('Failed to save');
+        alert('Sync failed. Refreshing data...');
+        loadData();
       } finally {
         isSaving = false;
       }
@@ -1645,16 +1648,19 @@
       }
       updatedB.stages[quickAddStageIdx].entries.push({ cost: amt, date: dt, note: note });
       
+      // Optimistic Update
+      batches = batches.map(x => x.id === updatedB.id ? updatedB : x);
+      quickAddStageIdx = null;
+      render();
+
       try {
         isSaving = true;
         const { error } = await sbClient.from('batches').update(updatedB).eq('id', updatedB.id);
         if (error) throw error;
-        batches = batches.map(x => x.id === updatedB.id ? updatedB : x);
-        quickAddStageIdx = null;
-        render();
       } catch (err) {
         console.error('Error quick add:', err);
-        alert('Failed to save amount');
+        alert('Sync failed. Refreshing data...');
+        loadData();
       } finally {
         isSaving = false;
       }
