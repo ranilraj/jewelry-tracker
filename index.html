@@ -564,14 +564,14 @@
       background: rgba(0, 0, 0, .75);
       display: flex;
       align-items: flex-end;
-      z-index: 200;
+      z-index: 2000;
     }
 
     .sheet {
       background: #111111;
       border-top: 1px solid #222222;
       border-radius: 20px 20px 0 0;
-      padding: 24px 20px;
+      padding: 24px 20px 40px;
       width: 100%;
     }
 
@@ -689,6 +689,15 @@
     }
     function profPct(cost, sell) { cost = parseFloat(cost); sell = parseFloat(sell); if (!cost || !sell || isNaN(cost) || isNaN(sell)) return null; return ((sell - cost) / cost * 100); }
 
+    function totalSalesRevenue(b) {
+      if (!b.sales || !Array.isArray(b.sales)) return parseFloat(b.sellingPrice) || 0;
+      return b.sales.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0);
+    }
+    function totalSoldQty(b) {
+      if (!b.sales || !Array.isArray(b.sales)) return (b.sellingPrice && b.sellingDate) ? (parseFloat(b.qty) || 0) : 0;
+      return b.sales.reduce((acc, s) => acc + (parseFloat(s.qty) || 0), 0);
+    }
+
     // State
     let auth = localStorage.getItem('rj_auth') === '1';
     let batches = [];
@@ -703,6 +712,7 @@
     let quickAddStageIdx = null;
     let longPressTimer = null;
     let isSaving = false;
+    let quickAddSaleBatchId = null;
 
     async function loadData() {
       try {
@@ -724,6 +734,16 @@
               }
             });
           }
+          // Migration for Sales
+          if (!b.sales && b.sellingPrice) {
+            b.sales = [{
+              price: b.sellingPrice,
+              date: b.sellingDate || b.date,
+              qty: b.qty || 0,
+              store: 'Initial Sale'
+            }];
+          }
+          if (!b.sales) b.sales = [];
           return b;
         });
       } catch (err) {
@@ -772,22 +792,24 @@
       const isP = p >= 0; const c = isP ? '#10b981' : '#ef4444';
       return `<span class="badge" style="background:${isP ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'};color:${c};border:1px solid ${c}">${isP ? '▲' : '▼'} ${Math.abs(p).toFixed(1)}%</span>`;
     }
-    function profitCardHTML(st, selling, qty) {
-      const cost = totalCost(st); const sell = parseFloat(selling);
-      if (!cost || !sell || isNaN(sell)) return '';
-      const profit = sell - cost; const pct = (profit / cost * 100); const isP = profit >= 0;
+    function profitCardHTML(b) {
+      const cost = totalCost(b.stages); const sell = totalSalesRevenue(b);
+      const profit = sell - cost; const pct = cost ? (profit / cost * 100) : 0; const isP = profit >= 0;
       const clr = isP ? '#10b981' : '#ef4444';
       let qrow = '';
       let profPerPcHTML = '';
-      if (parseFloat(qty) > 0) {
-        qrow = `<div class="prow"><span class="prow-lbl">Cost per piece (${fmt(qty)} pcs)</span><span class="prow-val-sm">₹${(cost / parseFloat(qty)).toFixed(2)}</span></div>`;
-        profPerPcHTML = `<span style="color:#aaa;font-size:12px;font-family:monospace;margin-right:12px;">${isP ? '+' : '−'}₹${(Math.abs(profit) / parseFloat(qty)).toFixed(2)}/pc</span>`;
+      const qty = parseFloat(b.qty);
+      if (qty > 0) {
+        qrow = `<div class="prow"><span class="prow-lbl">Cost per piece (${fmt(qty)} pcs)</span><span class="prow-val-sm">₹${(cost / qty).toFixed(2)}</span></div>`;
+        if (totalSoldQty(b) > 0) {
+          profPerPcHTML = `<span style="color:#aaa;font-size:12px;font-family:monospace;margin-right:12px;">${isP ? '+' : '−'}₹${(Math.abs(profit) / totalSoldQty(b)).toFixed(2)}/pc sold</span>`;
+        }
       }
       return `<div class="profit-card" style="background:${isP ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'};border:1px solid ${isP ? '#10b98133' : '#ef444433'}">
     <div class="pgrid">
       <div><div class="plbl">TOTAL COST</div><div class="pval" style="color:#aaa">₹${fmt(cost)}</div></div>
-      <div><div class="plbl">SELLING</div><div class="pval" style="color:#f59e0b">₹${fmt(sell)}</div></div>
-      <div><div class="plbl">PROFIT %</div><div class="pval" style="color:${clr}">${isP ? '+' : ''}${pct.toFixed(1)}%</div></div>
+      <div><div class="plbl">TOTAL REVENUE</div><div class="pval" style="color:#f59e0b">₹${fmt(sell)}</div></div>
+      <div><div class="plbl">OVERALL PROFIT %</div><div class="pval" style="color:${clr}">${isP ? '+' : ''}${pct.toFixed(1)}%</div></div>
     </div>
     <div class="pdiv">
       <div class="prow"><span class="prow-lbl">Net ${isP ? 'Profit' : 'Loss'}</span><div style="display:flex;align-items:center;">${profPerPcHTML}<span class="prow-val" style="color:${clr}">${isP ? '+' : '−'}₹${fmt(Math.abs(profit))}</span></div></div>
@@ -824,18 +846,19 @@
     function renderList() {
       const total = batches.length;
       const spend = batches.reduce((s, b) => s + totalCost(b.stages), 0);
-      const pb = batches.filter(b => b.sellingPrice && totalCost(b.stages));
-      const avg = pb.length ? pb.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + ((sp - c) / c * 100); }, 0) / pb.length : 0;
-      const allNetProfit = pb.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + (sp - c); }, 0);
+      const pb = batches.filter(b => totalSalesRevenue(b) > 0);
+      const avg = pb.length ? pb.reduce((s, b) => { const c = totalCost(b.stages), sp = totalSalesRevenue(b); return s + ((sp - c) / c * 100); }, 0) / pb.length : 0;
+      const allNetProfit = pb.reduce((s, b) => { const c = totalCost(b.stages), sp = totalSalesRevenue(b); return s + (sp - c); }, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const pb30 = pb.filter(b => {
-        const d = parseDateObj(b.sellingDate || b.date);
+        const lastSaleDate = (b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : (b.sellingDate || b.date);
+        const d = parseDateObj(lastSaleDate);
         return !isNaN(d) && d >= thirtyDaysAgo;
       });
-      const netProfit30 = pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + (sp - c); }, 0);
+      const netProfit30 = pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = totalSalesRevenue(b); return s + (sp - c); }, 0);
       let activeDays = 30;
       if (pb30.length > 0) {
         let earliest = today;
@@ -856,32 +879,36 @@
         return !isNaN(d) && d >= thirtyDaysAgo;
       });
       const spend30 = all30.reduce((s, b) => s + totalCost(b.stages), 0);
-      const avg30 = pb30.length ? pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + ((sp - c) / c * 100); }, 0) / pb30.length : 0;
+      const avg30 = pb30.length ? pb30.reduce((s, b) => { const c = totalCost(b.stages), sp = totalSalesRevenue(b); return s + ((sp - c) / c * 100); }, 0) / pb30.length : 0;
 
       const filteredBatches = batches.filter(b => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (b.name && b.name.toLowerCase().includes(q)) || (b.id && b.id.toString().includes(q));
       }).sort((a, b) => {
-        const aComp = (a.sellingDate && a.sellingPrice) ? 1 : 0;
-        const bComp = (b.sellingDate && b.sellingPrice) ? 1 : 0;
+        const aSoldQty = totalSoldQty(a);
+        const bSoldQty = totalSoldQty(b);
+        const aComp = ((a.qty > 0 && aSoldQty >= a.qty) || a.sellingDate) ? 1 : 0;
+        const bComp = ((b.qty > 0 && bSoldQty >= b.qty) || b.sellingDate) ? 1 : 0;
         if (aComp !== bComp) return aComp - bComp;
-        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj(a.sellingDate).getTime() || 0);
-        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj(b.sellingDate).getTime() || 0);
+        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj((a.sales && a.sales.length > 0) ? a.sales[a.sales.length-1].date : (a.sellingDate || a.date)).getTime() || 0);
+        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : (b.sellingDate || b.date)).getTime() || 0);
         if (dA !== dB) return dB - dA;
         return b.id - a.id;
       });
       const cards = filteredBatches.length === 0 ? (searchQuery ? `<div class="empty">No batches found.</div>` : `<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>`) :
         filteredBatches.map(b => {
-          const cost = totalCost(b.stages); const sell = parseFloat(b.sellingPrice);
-          const isCompleted = b.sellingDate && b.sellingPrice;
-          const profitAmtHTML = (cost > 0 && sell > 0 && !isNaN(sell)) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
+          const cost = totalCost(b.stages); const sell = totalSalesRevenue(b);
+          const soldQty = totalSoldQty(b);
+          const isCompleted = (b.qty > 0 && soldQty >= b.qty) || b.sellingDate;
+          const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#ef4444'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
+        <div style="font-family:monospace;font-size:10px;color:#666;margin-bottom:8px;">${soldQty}/${b.qty || 0} pieces sold</div>
         <div class="pills">${pillsHTML(b.stages)}</div>
         <div class="prog">${progBars(b.stages)}</div>
         <div class="prog-lbl">${stagesFilled(b.stages)}/${totalStages(b.stages)} stages recorded</div>
@@ -941,7 +968,7 @@
         <div><label class="lbl">TOTAL QTY (pcs)</label><input class="inp" type="number" placeholder="0" value="${nd.qty}" oninput="nd_set('qty',this.value)"/></div>
       </div>
       <div style="margin-top:12px">
-        <label class="lbl">COMPLETION DATE (optional)</label>
+        <label class="lbl">COMPLETION DATE (marks green)</label>
         <input class="inp fp-date" type="text" data-placeholder="Completion Date" placeholder="Completion Date" value="${toInputDate(nd.sellingDate)}" oninput="nd_set('sellingDate',this.value);"/>
       </div>
     </div>
@@ -981,9 +1008,23 @@
       ${cost > 0 ? `<div class="total-row"><span class="total-lbl">TOTAL COST</span><span class="total-val">₹${fmt(cost)}</span></div>` : ''}
     </div>
     <div class="card">
-      <div class="clbl">SELLING PRICE (₹ total batch)</div>
-      <input class="inp" type="number" placeholder="Total selling amount" value="${nd.sellingPrice}" oninput="nd_set('sellingPrice',this.value)"/>
-      ${profRow}
+      <div class="clbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>SALES & DISTRIBUTION</span>
+        <button class="btn-edit" onclick="addSale(false)">+ Add Sale</button>
+      </div>
+      ${(!nd.sales || nd.sales.length === 0) ? `<div class="empty" style="padding:10px 0;">No sales recorded yet.</div>` : nd.sales.map((sale, si) => `
+        <div style="padding:12px; background:#111; border-radius:8px; margin-bottom:8px; border:1px solid #222;">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div style="flex:1;"><label class="lbl">QTY</label><input class="inp-sm" style="width:100%;" type="number" value="${sale.qty}" oninput="updateSale(false, ${si}, 'qty', this.value)"/></div>
+            <div style="flex:2;"><label class="lbl">PRICE (₹)</label><input class="inp-sm" style="width:100%;" type="number" value="${sale.price}" oninput="updateSale(false, ${si}, 'price', this.value)"/></div>
+            <button class="btn-del" style="height:36px; margin-top:18px;" onclick="removeSale(false, ${si})">✕</button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1;"><label class="lbl">DATE</label><input class="inp-sm fp-date" style="width:100%;" type="text" value="${toInputDate(sale.date)}" oninput="updateSale(false, ${si}, 'date', this.value)"/></div>
+            <div style="flex:1;"><label class="lbl">STORE</label><input class="inp-sm" style="width:100%;" type="text" placeholder="Store name" value="${sale.store || ''}" oninput="updateSale(false, ${si}, 'store', this.value)"/></div>
+          </div>
+        </div>
+      `).join('')}
     </div>
     <div class="card">
       <label class="lbl">NOTES (optional)</label>
@@ -1085,7 +1126,7 @@
         : `<span>START: ${fmtDateUI(d.date)}</span>`}
       ${getDaysHTML(d.date, d.sellingDate, true)}
     </div>
-    ${profitCardHTML(d.stages, d.sellingPrice, d.qty)}
+    ${profitCardHTML(d)}
     <div class="card">
       <div class="clbl" style="display:flex; justify-content:space-between; align-items:center;">
         <span>STAGES & COSTS</span>
@@ -1097,13 +1138,47 @@
       <div class="total-row"><span class="total-lbl">TOTAL COST</span><span class="total-val">₹${fmt(cost)}</span></div>
     </div>
     <div class="card">
-      <div class="clbl">SELLING & QUANTITY</div>
-      <div class="flex2" style="margin-bottom:12px;">
-        <div>
-          <label class="lbl">SELLING PRICE</label>
-          ${editMode ? `<input class="inp" type="number" value="${d.sellingPrice}" placeholder="0" oninput="dr_set('sellingPrice',this.value)"/>`
-          : `<div class="price-static" style="color:#f59e0b">${d.sellingPrice ? '₹' + fmt(d.sellingPrice) : '—'}</div>`}
+      <div class="clbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>SALES & DISTRIBUTION</span>
+        ${editMode ? `<button class="btn-edit" onclick="addSale(true)">+ Add Sale</button>` : ''}
+      </div>
+      <div style="font-family:monospace; font-size:12px; color:#aaa; margin-bottom:12px;">
+        ${totalSoldQty(d)}/${d.qty || 0} pieces sold
+        <div style="width:100%; height:4px; background:#222; border-radius:2px; margin-top:6px; overflow:hidden;">
+          <div style="width:${Math.min(100, (totalSoldQty(d)/(d.qty||1))*100)}%; height:100%; background:#f59e0b;"></div>
         </div>
+      </div>
+      
+      ${(!d.sales || d.sales.length === 0) ? `<div class="empty" style="padding:10px 0;">No sales recorded yet.</div>` : d.sales.map((sale, si) => {
+        if (editMode) {
+          return `<div style="padding:12px; background:#111; border-radius:8px; margin-bottom:8px; border:1px solid #222;">
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <div style="flex:1;"><label class="lbl">QTY</label><input class="inp-sm" style="width:100%;" type="number" value="${sale.qty}" oninput="updateSale(true, ${si}, 'qty', this.value)"/></div>
+              <div style="flex:2;"><label class="lbl">PRICE (₹)</label><input class="inp-sm" style="width:100%;" type="number" value="${sale.price}" oninput="updateSale(true, ${si}, 'price', this.value)"/></div>
+              <button class="btn-del" style="height:36px; margin-top:18px;" onclick="removeSale(true, ${si})">✕</button>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <div style="flex:1;"><label class="lbl">DATE</label><input class="inp-sm fp-date" style="width:100%;" type="text" value="${toInputDate(sale.date)}" oninput="updateSale(true, ${si}, 'date', this.value)"/></div>
+              <div style="flex:1;"><label class="lbl">STORE</label><input class="inp-sm" style="width:100%;" type="text" placeholder="Store name" value="${sale.store || ''}" oninput="updateSale(true, ${si}, 'store', this.value)"/></div>
+            </div>
+          </div>`;
+        } else {
+          return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #111;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:#f59e0b;">₹${fmt(sale.price)}</div>
+              <div style="font-size:11px; color:#666; font-family:monospace;">${sale.qty} pcs to ${sale.store || '—'}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:monospace; font-size:11px; color:#aaa;">${fmtDateUI(sale.date)}</div>
+              <div style="font-family:monospace; font-size:10px; color:#666;">₹${(sale.price/sale.qty).toFixed(2)}/pc</div>
+            </div>
+          </div>`;
+        }
+      }).join('')}
+    </div>
+    <div class="card">
+      <div class="clbl">BATCH INFO</div>
+      <div class="flex2" style="margin-bottom:12px;">
         <div>
           <label class="lbl">TOTAL QTY (pcs)</label>
           ${editMode ? `<input class="inp" type="number" value="${d.qty}" placeholder="0" oninput="dr_set('qty',this.value)"/>`
@@ -1154,7 +1229,7 @@
     // Actions
     function goList() { view = 'list'; selId = null; editMode = false; draft = null; delConf = false; render(); }
     function goNew() {
-      newB = { name: '', date: new Date().toLocaleDateString('en-CA'), qty: '', stages: [], sellingPrice: '', sellingDate: '', notes: '' };
+      newB = { name: '', date: new Date().toLocaleDateString('en-CA'), qty: '', stages: [], sales: [], sellingDate: '', notes: '' };
       view = 'new'; render();
     }
     function openDetail(id) { selId = id; editMode = false; draft = null; view = 'detail'; render(); }
@@ -1193,14 +1268,15 @@
       const headers = ['ID', 'Name', 'Start Date', 'Completion Date', 'Quantity', 'Total Cost', 'Selling Price', 'Net Profit', 'Profit Margin (%)'];
       const rows = batches.map(b => {
         const cost = totalCost(b.stages);
-        const sell = parseFloat(b.sellingPrice) || 0;
+        const sell = totalSalesRevenue(b);
         const profit = sell - cost;
         const margin = cost ? ((profit / cost) * 100).toFixed(2) : 0;
+        const lastSaleDate = (b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : '';
         return [
           b.id,
           `"${(b.name || '').replace(/"/g, '""')}"`,
           b.date || '',
-          b.sellingDate || '',
+          lastSaleDate,
           b.qty || '',
           cost,
           sell,
@@ -1227,25 +1303,29 @@
         if (!searchQuery) return true;
         return (b.name && b.name.toLowerCase().includes(q)) || (b.id && b.id.toString().includes(q));
       }).sort((a, b) => {
-        const aComp = (a.sellingDate && a.sellingPrice) ? 1 : 0;
-        const bComp = (b.sellingDate && b.sellingPrice) ? 1 : 0;
+        const aSoldQty = totalSoldQty(a);
+        const bSoldQty = totalSoldQty(b);
+        const aComp = ((a.qty > 0 && aSoldQty >= a.qty) || a.sellingDate) ? 1 : 0;
+        const bComp = ((b.qty > 0 && bSoldQty >= b.qty) || b.sellingDate) ? 1 : 0;
         if (aComp !== bComp) return aComp - bComp;
-        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj(a.sellingDate).getTime() || 0);
-        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj(b.sellingDate).getTime() || 0);
+        const dA = (aComp === 0) ? (parseDateObj(a.date).getTime() || 0) : (parseDateObj((a.sales && a.sales.length > 0) ? a.sales[a.sales.length-1].date : (a.sellingDate || a.date)).getTime() || 0);
+        const dB = (bComp === 0) ? (parseDateObj(b.date).getTime() || 0) : (parseDateObj((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : (b.sellingDate || b.date)).getTime() || 0);
         if (dA !== dB) return dB - dA;
         return b.id - a.id;
       });
       const cards = filteredBatches.length === 0 ? (searchQuery ? `<div class="empty">No batches found.</div>` : `<div class="empty">No batches yet.<br/>Tap + New Batch to start.</div>`) :
         filteredBatches.map(b => {
-          const cost = totalCost(b.stages); const sell = parseFloat(b.sellingPrice);
-          const isCompleted = b.sellingDate && b.sellingPrice;
-          const profitAmtHTML = (cost > 0 && sell > 0 && !isNaN(sell)) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
+          const cost = totalCost(b.stages); const sell = totalSalesRevenue(b);
+          const soldQty = totalSoldQty(b);
+          const isCompleted = (b.qty > 0 && soldQty >= b.qty) || b.sellingDate;
+          const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
           return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#ef4444'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, b.sellingDate, false)}</div></div>
+          <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
+        <div style="font-family:monospace;font-size:10px;color:#666;margin-bottom:8px;">${soldQty}/${b.qty || 0} pieces sold</div>
         <div class="pills">${pillsHTML(b.stages)}</div>
         <div class="prog">${progBars(b.stages)}</div>
         <div class="prog-lbl">${stagesFilled(b.stages)}/${totalStages(b.stages)} stages recorded</div>
@@ -1305,6 +1385,26 @@
       const target = isDraft ? draft : newB;
       if (!target.stages[stageIdx].entries) target.stages[stageIdx].entries = [{ cost: '', date: '', note: '' }];
       target.stages[stageIdx].entries[entryIdx].note = val;
+    }
+
+    function addSale(isDraft) {
+      const target = isDraft ? draft : (view === 'new' ? newB : null);
+      if (!target) return;
+      if (!target.sales) target.sales = [];
+      target.sales.push({ qty: '', price: '', date: new Date().toLocaleDateString('en-CA'), store: '' });
+      render();
+    }
+    function removeSale(isDraft, idx) {
+      if (!confirm('Remove this sale record?')) return;
+      const target = isDraft ? draft : (view === 'new' ? newB : null);
+      if (!target) return;
+      target.sales.splice(idx, 1);
+      render();
+    }
+    function updateSale(isDraft, idx, key, val) {
+      const target = isDraft ? draft : (view === 'new' ? newB : null);
+      if (!target) return;
+      target.sales[idx][key] = val;
     }
 
     function startPress(e, idx) {
@@ -1484,6 +1584,158 @@
   </div>`;
     }
 
+    function renderInventoryView() {
+      const unsold = batches.filter(b => totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
+      const cards = unsold.length === 0 ? `<div class="empty">No unsold inventory.</div>` :
+        unsold.map(b => {
+          const remaining = (parseFloat(b.qty) || 0) - totalSoldQty(b);
+          return `<div class="bcard" onclick="openDetail(${b.id})">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="color:#aaa;font-size:11px;font-family:monospace;margin-bottom:2px">#${b.id}</div>
+                <div class="bname">${b.name}</div>
+                <div class="bdate" style="color:#f59e0b">Remaining: ${remaining} pcs</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-family:monospace;font-size:11px;color:#666;">Total Qty: ${b.qty}</div>
+                <div style="font-family:monospace;font-size:10px;color:#444;margin-top:4px;">${b.sellingDate ? 'Completed: ' + fmtDateUI(b.sellingDate) : 'Started: ' + fmtDateUI(b.date)}</div>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+
+      return `<div class="header">
+        <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Inventory (Unsold)</div></div>
+      </div>
+      <div class="content" style="padding-top:16px">${cards}</div>`;
+    }
+
+    function renderSalesView() {
+      const allSales = [];
+      batches.forEach(b => {
+        if (b.sales && b.sales.length > 0) {
+          b.sales.forEach(s => {
+            allSales.push({ ...s, batchId: b.id, batchName: b.name });
+          });
+        }
+      });
+      allSales.sort((a, b) => parseDateObj(b.date) - parseDateObj(a.date));
+
+      const cards = allSales.length === 0 ? `<div class="empty">No sales recorded.</div>` :
+        allSales.map(s => `
+          <div class="bcard" onclick="openDetail(${s.batchId})">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div style="flex:1">
+                <div style="font-family:monospace;font-size:11px;color:#aaa;margin-bottom:4px;">${fmtDateUI(s.date)}</div>
+                <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${s.store || 'General Sale'}</div>
+                <div style="font-family:monospace;font-size:11px;color:#666;">#${s.batchId} ${s.batchName}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-weight:700;font-size:16px;color:#10b981;">₹${fmt(s.price)}</div>
+                <div style="font-family:monospace;font-size:11px;color:#aaa;margin-top:2px;">${s.qty} pcs @ ₹${(s.price/s.qty).toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+      return `<div class="header">
+        <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Sales Ledger</div></div>
+        <button class="new-btn" onclick="startQuickSale()">+ Add Sale</button>
+      </div>
+      <div class="content" style="padding-top:16px">
+        ${cards}
+      </div>
+      ${quickAddSaleBatchId ? renderQuickSaleOverlay() : ''}`;
+    }
+
+    function renderQuickSaleOverlay() {
+      if (quickAddSaleBatchId === true) {
+        // Step 1: Select Batch
+        const available = batches.filter(b => totalSoldQty(b) < (parseFloat(b.qty) || 0)).sort((a, b) => b.id - a.id);
+        const list = available.length === 0 ? `<div class="empty">No batches with remaining stock.</div>` :
+          available.map(b => `
+            <div class="srow" style="padding:12px; border:1px solid #222; border-radius:8px; margin-bottom:8px; cursor:pointer;" onclick="quickAddSaleBatchId=${b.id};render()">
+              <div style="font-family:monospace; font-size:11px; color:#aaa;">#${b.id}</div>
+              <div style="font-weight:bold;">${b.name}</div>
+              <div style="font-size:11px; color:#f59e0b;">${(parseFloat(b.qty)||0) - totalSoldQty(b)} pieces remaining</div>
+            </div>
+          `).join('');
+          
+        return `<div class="overlay" onclick="quickAddSaleBatchId=null;render()">
+          <div class="sheet" onclick="event.stopPropagation()" style="max-height:80vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3>Select Batch</h3>
+              <button class="btn-del" onclick="quickAddSaleBatchId=null;render()">✕</button>
+            </div>
+            ${list}
+          </div>
+        </div>`;
+      } else {
+        // Step 2: Enter Sale Details
+        const b = batches.find(x => x.id === quickAddSaleBatchId);
+        if (!b) return '';
+        const rem = (parseFloat(b.qty)||0) - totalSoldQty(b);
+        return `<div class="overlay" onclick="quickAddSaleBatchId=null;render()">
+          <div class="sheet" onclick="event.stopPropagation()">
+            <h3>Add Sale for ${b.name}</h3>
+            <p>Batch #${b.id} | <span style="color:#f59e0b">${rem} pieces available</span></p>
+            <div style="margin-bottom:16px;">
+              <div class="flex2" style="margin-bottom:12px;">
+                <div><label class="lbl">QTY (max ${rem})</label><input class="inp" id="qs_qty" type="number" value="${rem}" /></div>
+                <div><label class="lbl">TOTAL PRICE (₹)</label><input class="inp" id="qs_price" type="number" placeholder="Enter amount" /></div>
+              </div>
+              <label class="lbl">STORE / CUSTOMER</label>
+              <input class="inp" id="qs_store" type="text" placeholder="Store name" style="margin-bottom:12px;"/>
+              <label class="lbl">DATE</label>
+              <input class="inp fp-date" id="qs_date" type="text" value="${new Date().toLocaleDateString('en-CA')}" placeholder="Date" />
+            </div>
+            <div class="btn-row">
+              <button class="btn-ghost" onclick="quickAddSaleBatchId=true;render()">← Back</button>
+              <button class="btn-gold" onclick="saveQuickSale()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Save Sale'}</button>
+            </div>
+          </div>
+        </div>`;
+      }
+    }
+
+    function startQuickSale() {
+      quickAddSaleBatchId = true;
+      render();
+    }
+
+    async function saveQuickSale() {
+      if (isSaving) return;
+      const b = batches.find(x => x.id === quickAddSaleBatchId);
+      if (!b) return;
+
+      const qty = parseFloat(document.getElementById('qs_qty').value);
+      const price = parseFloat(document.getElementById('qs_price').value);
+      const date = document.getElementById('qs_date').value;
+      const store = document.getElementById('qs_store').value;
+
+      if (!qty || !price) { alert('Enter quantity and price'); return; }
+      const rem = (parseFloat(b.qty)||0) - totalSoldQty(b);
+      if (qty > rem) { alert('Quantity exceeds remaining stock!'); return; }
+
+      const updatedB = JSON.parse(JSON.stringify(b));
+      if (!updatedB.sales) updatedB.sales = [];
+      updatedB.sales.push({ qty, price, date, store });
+
+      try {
+        isSaving = true;
+        const { error } = await sbClient.from('batches').update(updatedB).eq('id', b.id);
+        if (error) throw error;
+        batches = batches.map(x => x.id === b.id ? updatedB : x);
+        quickAddSaleBatchId = null;
+        render();
+      } catch (err) {
+        console.error('Error saving quick sale:', err);
+        alert('Failed to save sale');
+      } finally {
+        isSaving = false;
+      }
+    }
+
     function render() {
       const currentToken = view + (selId || '');
       if (lastViewToken !== currentToken) {
@@ -1497,21 +1749,31 @@
       else if (view === 'detail') html = renderDetail();
       else if (view === 'graph') html = typeof renderGraphView === 'function' ? renderGraphView(batches) : '<div class="empty">Loading...</div>';
       else if (view === 'profit_engine') html = renderProfitEngine();
+      else if (view === 'inventory') html = renderInventoryView();
+      else if (view === 'sales') html = renderSalesView();
       
-      if (auth && (view === 'list' || view === 'graph' || view === 'profit_engine')) {
+      if (auth && (view === 'list' || view === 'graph' || view === 'profit_engine' || view === 'inventory' || view === 'sales')) {
         html += `
           <div class="bottom-nav">
             <div class="nav-item ${view === 'list' ? 'active' : ''}" onclick="view='list';render()">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
               <span>Batches</span>
             </div>
+            <div class="nav-item ${view === 'inventory' ? 'active' : ''}" onclick="view='inventory';render()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              <span>Stock</span>
+            </div>
+            <div class="nav-item ${view === 'sales' ? 'active' : ''}" onclick="view='sales';render()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>Sales</span>
+            </div>
             <div class="nav-item ${view === 'graph' ? 'active' : ''}" onclick="view='graph';render()">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
               <span>Analytics</span>
             </div>
             <div class="nav-item ${view === 'profit_engine' ? 'active' : ''}" onclick="view='profit_engine';render()">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-              <span>Profit Engine</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              <span>Engine</span>
             </div>
           </div>
         `;
