@@ -1438,6 +1438,12 @@
       render(); 
     }
     function cancelEdit() { editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render(); }
+    async function saveEdit() {
+      if (isSaving) return;
+      try {
+        isSaving = true;
+        render(); // Show "Saving..."
+        
         const updatedB = JSON.parse(JSON.stringify(draft));
         delete updatedB.template;
 
