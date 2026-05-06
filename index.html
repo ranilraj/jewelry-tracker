@@ -791,11 +791,18 @@
           .order('id', { ascending: false });
 
         if (error) throw error;
-        batches = (data || []).map(b => cleanBatch(b));
-        setupRealtime();
+        const loadedBatches = (data || []).map(b => cleanBatch(b));
+        if (loadedBatches.length > 0) batches = loadedBatches;
+        
+        // Setup realtime only once
+        if (!window.realtimeSubscribed) {
+          setupRealtime();
+          window.realtimeSubscribed = true;
+        }
       } catch (err) {
-        console.error('Error loading data:', err);
-        batches = [];
+        console.error('CRITICAL: Error loading data from Supabase:', err);
+        // Don't clear batches if we already have data in memory
+        if (batches.length === 0) batches = []; 
       }
       render();
     }
@@ -1008,7 +1015,10 @@
     <button class="new-btn" onclick="goNew()">+ New Batch</button>
   </div>
   <div class="content">
-    <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
+    <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span>LAST 30 DAYS</span>
+      <button class="btn-ghost" style="padding:2px 8px;font-size:10px;" onclick="loadData()">⟳ Sync</button>
+    </div>
     <div class="stats" style="margin-bottom:24px;">
       <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">30D REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(revenue30)}</div></div>
       <div class="stat"><div class="stat-lbl">30D SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend30)}</div></div>
