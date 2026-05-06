@@ -722,6 +722,7 @@
     const LS_KEY_DRAFT = 'jewelry_draft_edit';
     const LS_KEY_NEW = 'jewelry_draft_new';
     const LS_KEY_STATE = 'jewelry_app_state';
+    const LS_KEY_BATCHES = 'jewelry_batches_cache';
 
     let lsTimer = null;
     function saveToLocal() {
@@ -738,6 +739,10 @@
     }
 
     function restoreFromLocal() {
+      const cached = localStorage.getItem(LS_KEY_BATCHES);
+      if (cached) {
+        try { batches = JSON.parse(cached).map(b => cleanBatch(b)); } catch(e) {}
+      }
       const savedNew = localStorage.getItem(LS_KEY_NEW);
       if (savedNew) {
         try { newB = JSON.parse(savedNew); } catch(e) {}
@@ -792,10 +797,11 @@
 
         if (error) throw error;
         batches = (data || []).map(b => cleanBatch(b));
+        localStorage.setItem(LS_KEY_BATCHES, JSON.stringify(batches));
         setupRealtime();
       } catch (err) {
         console.error('Error loading data:', err);
-        batches = [];
+        // Don't empty batches if we have cached data
       }
       render();
     }
@@ -1009,6 +1015,7 @@
   </div>
   <div class="content">
     <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
+    ${batches.length === 0 ? `<div style="padding:40px; text-align:center; color:#666; font-family:monospace; font-size:12px;">Loading data...</div>` : `
     <div class="stats" style="margin-bottom:24px;">
       <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">30D REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(revenue30)}</div></div>
       <div class="stat"><div class="stat-lbl">30D SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend30)}</div></div>
@@ -1018,6 +1025,7 @@
       <div class="stat"><div class="stat-lbl">30D AVG MARGIN</div><div class="stat-val" style="color:${avg30 >= 0 ? '#10b981' : '#ef4444'}">${avg30.toFixed(1)}%</div></div>
       <div class="stat"><div class="stat-lbl">DAILY AVG PROFIT</div><div class="stat-val" style="color:${avgDailyProfit30 >= 0 ? '#10b981' : '#ef4444'}">${avgDailyProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(avgDailyProfit30))}</div></div>
     </div>
+    `}
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;">RECENT BATCHES</div>
