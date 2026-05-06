@@ -902,16 +902,13 @@
           const soldQty = totalSoldQty(b);
           const isCompleted = (b.qty > 0 && soldQty >= b.qty) || b.sellingDate;
           const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
-          return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#ef4444'}" onclick="openDetail(${b.id})">
+          return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#f59e0b'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
           <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
-        <div style="font-family:monospace;font-size:10px;color:#666;margin-bottom:8px;">${soldQty}/${b.qty || 0} pieces sold</div>
-        <div class="pills">${pillsHTML(b.stages)}</div>
-        <div class="prog">${progBars(b.stages)}</div>
-        <div class="prog-lbl">${stagesFilled(b.stages)}/${totalStages(b.stages)} stages recorded</div>
+        <div style="font-family:monospace;font-size:10px;color:#666;">${soldQty}/${b.qty || 0} pieces sold</div>
       </div>`;
         }).join('');
 
@@ -1319,16 +1316,13 @@
           const soldQty = totalSoldQty(b);
           const isCompleted = (b.qty > 0 && soldQty >= b.qty) || b.sellingDate;
           const profitAmtHTML = (cost > 0 && sell > 0) ? `<div style="font-family:monospace;font-size:11px;color:${sell - cost >= 0 ? '#10b981' : '#ef4444'};margin-top:2px">${sell - cost >= 0 ? '+' : '-'}₹${sfmt(Math.abs(sell - cost))}</div>` : '';
-          return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#ef4444'}" onclick="openDetail(${b.id})">
+          return `<div class="bcard" style="border-left: 4px solid ${isCompleted ? '#10b981' : '#f59e0b'}" onclick="openDetail(${b.id})">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
           <div><div style="color:#aaa;font-size:12px;font-family:monospace;margin-bottom:2px">#${b.id}</div><div class="bname">${b.name}</div><div class="bdate">${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length-1].date : b.sellingDate) : null), false)}</div></div>
           <div style="text-align:right">${badgeHTML(cost, sell)}${cost > 0 ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:4px">Cost ₹${sfmt(cost)}</div>` : ''}${profitAmtHTML}
           </div>
         </div>
-        <div style="font-family:monospace;font-size:10px;color:#666;margin-bottom:8px;">${soldQty}/${b.qty || 0} pieces sold</div>
-        <div class="pills">${pillsHTML(b.stages)}</div>
-        <div class="prog">${progBars(b.stages)}</div>
-        <div class="prog-lbl">${stagesFilled(b.stages)}/${totalStages(b.stages)} stages recorded</div>
+        <div style="font-family:monospace;font-size:10px;color:#666;">${soldQty}/${b.qty || 0} pieces sold</div>
       </div>`;
         }).join('');
       const container = document.getElementById('batch-cards');
