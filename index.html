@@ -99,7 +99,23 @@
 
     .title {
       font-weight: 700;
-      font-size: 17px;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .sticky-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid #222;
+      padding: 12px 16px 24px;
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
     }
 
     .new-btn {
@@ -1061,7 +1077,7 @@
 
       return `<div class="header">
     <button class="back-btn" onclick="goList()">←</button>
-    <div><div class="brand">RANIL JEWELLERS</div><div class="title">New Batch</div></div>
+    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">New Batch</div></div>
   </div>
   <div class="content" style="padding-top:16px">
     <div class="card">
@@ -1136,10 +1152,10 @@
       <label class="lbl">NOTES (optional)</label>
       <textarea class="inp" rows="3" placeholder="Any notes..." oninput="nd_set('notes',this.value)">${nd.notes}</textarea>
     </div>
-    <div class="btn-row">
-      <button class="btn-ghost" onclick="goList()">Cancel</button>
-      <button class="btn-gold" onclick="createBatch()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Create Batch'}</button>
-    </div>
+  </div>
+  <div class="sticky-footer">
+    <button class="btn-ghost" style="flex:1" onclick="goList()">Cancel</button>
+    <button class="btn-gold" style="flex:2" onclick="createBatch()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? (isSaving === 'done' ? 'Saved!' : 'Saving...') : 'Create Batch'}</button>
   </div>`;
     }
 
@@ -1211,7 +1227,7 @@
     <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title" style="font-size:14px"><span style="color:#aaa;font-size:12px;margin-right:6px">#${d.id}</span></div></div>
     <div style="display:flex;gap:8px">
       ${editMode
-          ? `<button class="btn-cancel" onclick="cancelEdit()">Cancel</button><button class="btn-save" onclick="saveEdit()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>`
+          ? ``
           : `<button class="btn-edit" onclick="startEdit()">✏️ Edit</button><button class="btn-del" onclick="showDel()">🗑</button>`}
     </div>
   </div>
@@ -1309,6 +1325,11 @@
             : `<p style="font-size:14px;color:#aaa;line-height:1.6">${d.notes}</p>`}
     </div>`: ''}
   </div>
+  ${editMode ? `
+  <div class="sticky-footer">
+    <button class="btn-ghost" style="flex:1" onclick="cancelEdit()">Cancel</button>
+    <button class="btn-gold" style="flex:2" onclick="saveEdit()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? (isSaving === 'done' ? 'Saved!' : 'Saving...') : 'Save'}</button>
+  </div>` : ''}
   ${delConf ? `<div class="overlay" onclick="hideDel()">
     <div class="sheet" onclick="event.stopPropagation()">
       <h3>Delete Batch?</h3>
@@ -1373,10 +1394,25 @@
       if (isSaving) return;
       try {
         isSaving = true;
+        render(); // Show "Saving..."
+        
         const { error } = await sbClient.from('batches').update(draft).eq('id', draft.id);
         if (error) throw error;
+        
         batches = batches.map(b => b.id === selId ? { ...draft } : b);
-        editMode = false; draft = null; clearLocal(LS_KEY_DRAFT); render();
+        localStorage.setItem(LS_KEY_BATCHES, JSON.stringify(batches));
+        
+        isSaving = 'done';
+        render();
+        
+        setTimeout(() => {
+          editMode = false;
+          draft = null;
+          isSaving = false;
+          clearLocal(LS_KEY_DRAFT);
+          clearLocal(LS_KEY_STATE);
+          render();
+        }, 600);
       } catch (err) {
         console.error('Error saving edit:', err);
         alert('Failed to save to database. Check console for details.');
@@ -1709,14 +1745,24 @@
       try {
         isSaving = true;
         render(); // Immediately show "Saving..." state
+        
         const { error } = await sbClient.from('batches').insert([newBatch]);
         if (error) throw error;
+        
         batches = [newBatch, ...batches];
-        newB = null;
-        clearLocal(LS_KEY_NEW);
-        clearLocal(LS_KEY_STATE);
-        view = 'list';
+        localStorage.setItem(LS_KEY_BATCHES, JSON.stringify(batches));
+        
+        isSaving = 'done';
         render();
+        
+        setTimeout(() => {
+          newB = null;
+          clearLocal(LS_KEY_NEW);
+          clearLocal(LS_KEY_STATE);
+          view = 'list';
+          isSaving = false;
+          render();
+        }, 600);
       } catch (err) {
         console.error('Error creating batch:', err);
         alert('Failed to save to database. Check console for details.');
