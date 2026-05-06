@@ -799,6 +799,10 @@
       const cost = totalCost(b.stages); const sell = totalSalesRevenue(b);
       const profit = sell - cost; const pct = cost ? (profit / cost * 100) : 0; const isP = profit >= 0;
       const clr = isP ? '#10b981' : '#ef4444';
+      
+      const makingPctOfRev = sell ? (cost / sell * 100) : 0;
+      const profitPctOfRev = sell ? (profit / sell * 100) : 0;
+
       let qrow = '';
       let profPerPcHTML = '';
       const qty = parseFloat(b.qty);
@@ -816,6 +820,9 @@
     </div>
     <div class="pdiv">
       <div class="prow"><span class="prow-lbl">Net ${isP ? 'Profit' : 'Loss'}</span><div style="display:flex;align-items:center;">${profPerPcHTML}<span class="prow-val" style="color:${clr}">${isP ? '+' : '−'}₹${fmt(Math.abs(profit))}</span></div></div>
+      <div class="prow" style="margin-top:4px;"><span class="prow-lbl" style="font-size:11px; font-weight:700; color:#aaa;">Profit % of Revenue</span><span class="prow-val-sm" style="color:${clr}; font-weight:700;">${isP ? '+' : ''}${profitPctOfRev.toFixed(1)}%</span></div>
+      <div class="prow" style="margin-top:2px;"><span class="prow-lbl" style="font-size:11px; font-weight:700; color:#aaa;">Making % of Revenue</span><span class="prow-val-sm" style="color:#aaa; font-weight:700;">${makingPctOfRev.toFixed(1)}%</span></div>
+      <div style="margin-top:8px; margin-bottom:8px; border-top:1px solid rgba(255,255,255,0.05);"></div>
       ${qrow}
     </div>
   </div>`;
