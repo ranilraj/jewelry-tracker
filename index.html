@@ -1586,11 +1586,11 @@
         const dStart = new Date(today); dStart.setDate(dStart.getDate() - daysStart);
         const dEnd = new Date(today); dEnd.setDate(dEnd.getDate() - daysEnd);
         return batches.filter(b => {
-          if (!b.sellingDate || !b.sellingPrice) return false;
+          if (!b.sellingDate || totalSalesRevenue(b) <= 0) return false;
           const d = parseDateObj(b.sellingDate);
           return !isNaN(d) && d >= dStart && d < dEnd;
         }).reduce((s, b) => { 
-          const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); 
+          const c = totalCost(b.stages), sp = totalSalesRevenue(b); 
           return s + (sp - c); 
         }, 0);
       };
@@ -1610,12 +1610,12 @@
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const pb30_arr = batches.filter(b => {
-        if (!b.sellingPrice) return false;
+        if (totalSalesRevenue(b) <= 0) return false;
         const d = parseDateObj(b.sellingDate || b.date);
         return !isNaN(d) && d >= thirtyDaysAgo;
       });
 
-      const netProfit30 = pb30_arr.reduce((s, b) => { const c = totalCost(b.stages), sp = parseFloat(b.sellingPrice); return s + (sp - c); }, 0);
+      const netProfit30 = pb30_arr.reduce((s, b) => { const c = totalCost(b.stages), sp = totalSalesRevenue(b); return s + (sp - c); }, 0);
       let activeDays = 30;
       if (pb30_arr.length > 0) {
         let earliest = today;

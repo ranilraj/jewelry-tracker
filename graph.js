@@ -39,9 +39,10 @@ function initCharts(batches) {
   // Helper functions assumed to exist in index.html global scope
   const _parseDate = typeof parseDateObj === 'function' ? parseDateObj : (s => new Date(s));
   const _totalCost = typeof totalCost === 'function' ? totalCost : (() => 0);
+  const _totalSalesRevenue = typeof totalSalesRevenue === 'function' ? totalSalesRevenue : (b => parseFloat(b.sellingPrice) || 0);
 
-  // Filter completed batches (those with a selling date and selling price)
-  const completed = batches.filter(b => b.sellingDate && b.sellingPrice);
+  // Filter completed batches (those with a selling date and recorded revenue)
+  const completed = batches.filter(b => b.sellingDate && _totalSalesRevenue(b) > 0);
 
   // Sort by selling date ascending (oldest to newest)
   const sorted = [...completed].sort((a, b) => _parseDate(a.sellingDate) - _parseDate(b.sellingDate));
@@ -52,7 +53,7 @@ function initCharts(batches) {
   
   const data5 = last5.map(b => {
     const cost = _totalCost(b.stages);
-    const revenue = parseFloat(b.sellingPrice);
+    const revenue = _totalSalesRevenue(b);
     return isNaN(revenue) ? 0 : (revenue - cost);
   });
 
@@ -110,7 +111,7 @@ function initCharts(batches) {
     if (!isNaN(d)) {
       const monthYear = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
       const cost = _totalCost(b.stages);
-      const revenue = parseFloat(b.sellingPrice);
+      const revenue = _totalSalesRevenue(b);
       const profit = isNaN(revenue) ? 0 : (revenue - cost);
       monthlyData[monthYear] = (monthlyData[monthYear] || 0) + profit;
     }
