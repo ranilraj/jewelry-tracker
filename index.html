@@ -717,6 +717,7 @@
     let isSaving = false;
     let quickAddSaleBatchId = null;
     let quickAddCompId = null;
+    let loading = true;
 
     // Local Persistence
     const LS_KEY_DRAFT = 'jewelry_draft_edit';
@@ -801,7 +802,8 @@
         setupRealtime();
       } catch (err) {
         console.error('Error loading data:', err);
-        // Don't empty batches if we have cached data
+      } finally {
+        loading = false;
       }
       render();
     }
@@ -1015,7 +1017,7 @@
   </div>
   <div class="content">
     <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
-    ${batches.length === 0 ? `<div style="padding:40px; text-align:center; color:#666; font-family:monospace; font-size:12px;">Loading data...</div>` : `
+    ${(loading && batches.length === 0) ? `<div style="padding:40px; text-align:center; color:#666; font-family:monospace; font-size:12px;">Loading data...</div>` : `
     <div class="stats" style="margin-bottom:24px;">
       <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">30D REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(revenue30)}</div></div>
       <div class="stat"><div class="stat-lbl">30D SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend30)}</div></div>
