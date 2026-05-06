@@ -1228,7 +1228,7 @@
     <div style="display:flex;gap:8px">
       ${editMode
           ? ``
-          : `<button class="btn-edit" onclick="startEdit()">✏️ Edit</button><button class="btn-del" onclick="showDel()">🗑</button>`}
+          : `<button class="btn-edit" onclick="startEdit()">✏️ Edit</button>`}
     </div>
   </div>
   <div class="content" style="padding-top:16px">
@@ -1324,6 +1324,10 @@
       ${editMode ? `<textarea class="inp" rows="3" placeholder="Any notes..." oninput="dr_set('notes',this.value)">${d.notes || ''}</textarea>`
             : `<p style="font-size:14px;color:#aaa;line-height:1.6">${d.notes}</p>`}
     </div>`: ''}
+    ${!editMode ? `
+    <div style="margin-top:40px; padding:20px 0; border-top:1px solid #1a1a1a;">
+      <button class="btn-del" style="width:100%; padding:14px; background:rgba(239,68,68,0.05); color:#ef4444; border:1px solid rgba(239,68,68,0.2);" onclick="showDel()">🗑 Delete this Batch</button>
+    </div>` : ''}
   </div>
   ${editMode ? `
   <div class="sticky-footer">
