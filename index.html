@@ -57,7 +57,11 @@
       cursor: pointer;
       border: none;
     }
-
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
     .header {
       background: linear-gradient(180deg, #1a1007 0%, #000000 100%);
       border-bottom: 1px solid #2a2010;
@@ -714,10 +718,11 @@
     let searchQuery = '';
     let quickAddStageIdx = null;
     let longPressTimer = null;
-    let isSaving = false;
-    let quickAddSaleBatchId = null;
     let quickAddCompId = null;
     let loading = true;
+    let syncError = null;
+    let isSaving = false;
+    let quickAddSaleBatchId = null;
 
     // Local Persistence
     const LS_KEY_DRAFT = 'jewelry_draft_edit';
@@ -799,9 +804,11 @@
         if (error) throw error;
         batches = (data || []).map(b => cleanBatch(b));
         localStorage.setItem(LS_KEY_BATCHES, JSON.stringify(batches));
+        syncError = null;
         setupRealtime();
       } catch (err) {
         console.error('Error loading data:', err);
+        syncError = 'Offline/Sync Failed';
       } finally {
         loading = false;
       }
@@ -1012,12 +1019,19 @@
         }).join('');
 
       return `<div class="header">
-    <div style="flex:1"><div class="brand">RANIL JEWELLERS</div><div class="title">Batch Tracker</div></div>
+    <div style="flex:1">
+      <div class="brand">RANIL JEWELLERS</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="title">Batch Tracker</span>
+        ${loading ? `<span style="font-size:10px; color:#f59e0b; animation:pulse 1.5s infinite;">● Syncing...</span>` : 
+          (syncError ? `<span style="font-size:10px; color:#ef4444; cursor:pointer;" onclick="loadData()">● ${syncError} (Retry)</span>` : 
+          `<span style="font-size:10px; color:#10b981;">● Online</span>`)}
+      </div>
+    </div>
     <button class="new-btn" onclick="goNew()">+ New Batch</button>
   </div>
   <div class="content">
     <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
-    ${(loading && batches.length === 0) ? `<div style="padding:40px; text-align:center; color:#666; font-family:monospace; font-size:12px;">Loading data...</div>` : `
     <div class="stats" style="margin-bottom:24px;">
       <div class="stat stat-full" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2);"><div class="stat-lbl" style="color:#f59e0b">30D REVENUE</div><div class="stat-val" style="color:#f59e0b;font-size:20px;">₹${sfmt(revenue30)}</div></div>
       <div class="stat"><div class="stat-lbl">30D SPEND</div><div class="stat-val" style="color:#f97316">₹${sfmt(spend30)}</div></div>
@@ -1027,7 +1041,6 @@
       <div class="stat"><div class="stat-lbl">30D AVG MARGIN</div><div class="stat-val" style="color:${avg30 >= 0 ? '#10b981' : '#ef4444'}">${avg30.toFixed(1)}%</div></div>
       <div class="stat"><div class="stat-lbl">DAILY AVG PROFIT</div><div class="stat-val" style="color:${avgDailyProfit30 >= 0 ? '#10b981' : '#ef4444'}">${avgDailyProfit30 >= 0 ? '+' : '-'}₹${sfmt(Math.abs(avgDailyProfit30))}</div></div>
     </div>
-    `}
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;">RECENT BATCHES</div>
