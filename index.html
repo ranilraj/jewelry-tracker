@@ -757,6 +757,31 @@
       }
     }
 
+    function cleanBatch(b) {
+      if (b.stages) {
+        b.stages.forEach(stg => {
+          if (!stg.entries) {
+            if (stg.cost !== undefined && stg.cost !== null && stg.cost !== '') {
+               stg.entries = [{cost: stg.cost, date: stg.date || ''}];
+            } else {
+               stg.entries = [];
+            }
+          }
+        });
+      }
+      // Migration for Sales
+      if (!b.sales && b.sellingPrice) {
+        b.sales = [{
+          price: b.sellingPrice,
+          date: b.sellingDate || b.date,
+          qty: b.qty || 0,
+          store: 'Initial Sale'
+        }];
+      }
+      if (!b.sales) b.sales = [];
+      return b;
+    }
+
     async function loadData() {
       restoreFromLocal();
       try {
@@ -766,35 +791,36 @@
           .order('id', { ascending: false });
 
         if (error) throw error;
-        batches = (data || []).map(b => {
-          if (b.stages) {
-            b.stages.forEach(stg => {
-              if (!stg.entries) {
-                if (stg.cost !== undefined && stg.cost !== null && stg.cost !== '') {
-                   stg.entries = [{cost: stg.cost, date: stg.date || ''}];
-                } else {
-                   stg.entries = [];
-                }
-              }
-            });
-          }
-          // Migration for Sales
-          if (!b.sales && b.sellingPrice) {
-            b.sales = [{
-              price: b.sellingPrice,
-              date: b.sellingDate || b.date,
-              qty: b.qty || 0,
-              store: 'Initial Sale'
-            }];
-          }
-          if (!b.sales) b.sales = [];
-          return b;
-        });
+        batches = (data || []).map(b => cleanBatch(b));
+        setupRealtime();
       } catch (err) {
         console.error('Error loading data:', err);
         batches = [];
       }
       render();
+    }
+
+    function setupRealtime() {
+      sbClient.channel('db-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'batches' },
+          (payload) => {
+            if (payload.eventType === 'INSERT') {
+              const nb = cleanBatch(payload.new);
+              if (!batches.find(x => x.id === nb.id)) {
+                batches = [nb, ...batches];
+              }
+            } else if (payload.eventType === 'UPDATE') {
+              const ub = cleanBatch(payload.new);
+              batches = batches.map(x => x.id === ub.id ? ub : x);
+            } else if (payload.eventType === 'DELETE') {
+              batches = batches.filter(x => x.id !== payload.old.id);
+            }
+            render();
+          }
+        )
+        .subscribe();
     }
     // saveData() removed, data is now saved directly to Supabase in actions
 
