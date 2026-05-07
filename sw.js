@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ranil-tracker-v16';
+const CACHE_NAME = 'ranil-tracker-v17';
 const ASSETS = [
   './',
   './index.html',
@@ -27,17 +27,22 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Use a simple network-first strategy for dynamic data AND HTML
-  if (e.request.mode === 'navigate' || e.request.url.includes('supabase.co') || e.request.url.includes('index.html')) {
+  // Never cache Supabase API calls
+  if (e.request.url.includes('supabase.co')) {
+    return; // Let it go to network normally without caching
+  }
+
+  // Network-first strategy for HTML and core assets
+  if (e.request.mode === 'navigate' || e.request.url.includes('index.html')) {
     e.respondWith(
       fetch(e.request).then(response => {
-        // Cache the new version
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return response;
       }).catch(() => caches.match(e.request))
     );
   } else {
+    // Cache-first for static assets
     e.respondWith(
       caches.match(e.request).then((response) => response || fetch(e.request))
     );
