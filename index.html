@@ -697,29 +697,29 @@
       'stone': {
         label: 'Stone Jewelry',
         stages: [
-          { name: 'Casting', entries: [{ cost: '', date: '' }] },
-          { name: 'Runner', entries: [{ cost: '', date: '' }] },
-          { name: 'Cutting', entries: [{ cost: '', date: '' }] },
-          { name: 'Stone', entries: [{ cost: '', date: '' }] },
-          { name: 'Fitting', entries: [{ cost: '', date: '' }] },
-          { name: 'Plating', entries: [{ cost: '', date: '' }] }
+          { name: 'Casting', entries: [] },
+          { name: 'Runner', entries: [] },
+          { name: 'Cutting', entries: [] },
+          { name: 'Stone', entries: [] },
+          { name: 'Fitting', entries: [] },
+          { name: 'Plating', entries: [] }
         ]
       },
       // 'plain': {
       //   label: 'Plain Jewelry',
       //   stages: [
-      //     { name: 'Casting', entries: [{ cost: '', date: '' }] },
-      //     { name: 'Runner', entries: [{ cost: '', date: '' }] },
-      //     { name: 'Fitting', entries: [{ cost: '', date: '' }] },
-      //     { name: 'Plating', entries: [{ cost: '', date: '' }] }
+      //     { name: 'Casting', entries: [] },
+      //     { name: 'Runner', entries: [] },
+      //     { name: 'Fitting', entries: [] },
+      //     { name: 'Plating', entries: [] }
       //   ]
       // },
       'Impon Jewelry': {
         label: 'Impon Jewelry',
         stages: [
-          { name: 'Metal', entries: [{ cost: '', date: '' }] },
-          { name: 'Making', entries: [{ cost: '', date: '' }] },
-          { name: 'Plating', entries: [{ cost: '', date: '' }] }
+          { name: 'Metal', entries: [] },
+          { name: 'Making', entries: [] },
+          { name: 'Plating', entries: [] }
         ]
       },
       'empty': {
@@ -1625,7 +1625,7 @@
     function addStage(isDraft) {
       const target = isDraft ? draft : newB;
       if (!target.stages) target.stages = [];
-      target.stages.push({ name: '', entries: [{ cost: '', date: '' }] });
+      target.stages.push({ name: '', entries: [] });
       saveToLocal();
       render();
     }
