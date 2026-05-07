@@ -831,14 +831,21 @@
     const LS_KEY_BATCHES = 'jewelry_batches_cache';
 
     let lsTimer = null;
-    function saveToLocal() {
+    function saveToLocal(now = false) {
       if (lsTimer) clearTimeout(lsTimer);
-      lsTimer = setTimeout(() => {
+      const fn = () => {
         if (draft) localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(draft));
         if (newB) localStorage.setItem(LS_KEY_NEW, JSON.stringify(newB));
         localStorage.setItem(LS_KEY_STATE, JSON.stringify({ view, selId, editMode }));
-      }, 500); // Debounce 500ms
+      };
+      if (now) fn();
+      else lsTimer = setTimeout(fn, 500);
     }
+
+    window.addEventListener('beforeunload', () => saveToLocal(true));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') saveToLocal(true);
+    });
 
     function clearLocal(key) {
       localStorage.removeItem(key);
@@ -895,6 +902,7 @@
 
     async function loadData() {
       restoreFromLocal();
+      render(); // Render restored state immediately
       try {
         const { data, error } = await sbClient
           .from('batches')
