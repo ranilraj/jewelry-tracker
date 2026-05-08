@@ -1255,7 +1255,7 @@
     </div>
     <div class="card">
       <label class="lbl">NOTES (optional)</label>
-      <textarea class="inp" rows="6" placeholder="Any notes..." oninput="nd_set('notes',this.value)">${nd.notes}</textarea>
+      <textarea class="inp" rows="6" placeholder="Any notes..." oninput="nd_set('notes',this.value)">${nd.notes || ''}</textarea>
     </div>
   </div>
   <div class="sticky-footer">
@@ -1484,7 +1484,8 @@
         sellingDate: '',
         template: 'stone',
         sales: [],
-        stages: JSON.parse(JSON.stringify(STAGE_TEMPLATES['stone'].stages))
+        stages: JSON.parse(JSON.stringify(STAGE_TEMPLATES['stone'].stages)),
+        notes: ''
       };
       view = 'new';
       saveToLocal();
