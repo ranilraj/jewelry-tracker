@@ -825,6 +825,7 @@
     let syncError = null;
     let isSaving = false;
     let isDeleting = false;
+    let isQuickEditingNotes = false;
     let quickAddSaleBatchId = null;
 
     // Local Persistence
@@ -1123,6 +1124,8 @@
                  ontouchstart="startCompPress(event, ${b.id})" 
                  onmouseup="endPress(event)" 
                  ontouchend="endPress(event)" 
+                ontouchmove="endPress(event)" 
+                ontouchcancel="endPress(event)" 
                  oncontextmenu="handleCompContext(event, ${b.id})">
               ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : b.sellingDate) : null), false)}
             </div></div>
@@ -1425,15 +1428,18 @@
                ontouchstart="startCompPress(event, ${d.id})" 
                onmouseup="endPress(event)" 
                ontouchend="endPress(event)" 
+               ontouchmove="endPress(event)" 
+               ontouchcancel="endPress(event)" 
                oncontextmenu="handleCompContext(event, ${d.id})">
                ${d.sellingDate ? fmtDateUI(d.sellingDate) : 'Tap to Mark Completion'}
              </div>`}
       </div>
     </div>
-    ${(editMode || d.notes) ? `<div class="card"><div class="clbl">NOTES</div>
+    <div class="card" ${editMode ? '' : `oncontextmenu="handleNotesContext(event)" ontouchstart="startNotesPress(event)" ontouchend="endPress(event)" ontouchmove="endPress(event)" ontouchcancel="endPress(event)" onmouseup="endPress(event)" style="cursor:pointer; transition: background-color 0.2s;"`}>
+      <div class="clbl">NOTES</div>
       ${editMode ? `<textarea class="inp" rows="6" placeholder="Any notes..." oninput="dr_set('notes',this.value)">${d.notes || ''}</textarea>`
-            : `<p style="font-size:14px;color:#aaa;line-height:1.6;white-space:pre-wrap;">${d.notes}</p>`}
-    </div>`: ''}
+            : `<p style="font-size:14px;color:${d.notes ? '#aaa' : '#444'};line-height:1.6;white-space:pre-wrap;">${d.notes || 'Tap & Hold to add notes...'}</p>`}
+    </div>
     ${!editMode ? `
     <div style="margin-top:40px; padding:20px 0; border-top:1px solid #1a1a1a;">
       <button class="btn-del" style="width:100%; padding:14px; background:rgba(239,68,68,0.05); color:#ef4444; border:1px solid rgba(239,68,68,0.2);" onclick="showDel()">🗑 Delete this Batch</button>
@@ -1469,6 +1475,22 @@
       <div class="btn-row">
         <button class="btn-ghost" onclick="cancelQuickAdd()">Cancel</button>
         <button class="btn-gold" onclick="saveQuickAdd()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Save Amount'}</button>
+      </div>
+    </div>
+  </div>`: ''}
+  ${isQuickEditingNotes ? `<div class="overlay" onclick="cancelQuickEditNotes()">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3>Quick Edit Notes</h3>
+        <button class="btn-del" onclick="cancelQuickEditNotes()">✕</button>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label class="lbl">NOTES</label>
+        <textarea class="inp" id="qe_notes" rows="8" placeholder="Enter notes...">${d.notes || ''}</textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" style="flex:1" onclick="cancelQuickEditNotes()">Cancel</button>
+        <button class="btn-gold" style="flex:2" onclick="saveQuickEditNotes()" ${isSaving ? 'disabled style="opacity:0.6"' : ''}>${isSaving ? 'Saving...' : 'Save Notes'}</button>
       </div>
     </div>
   </div>`: ''}`;
@@ -1634,6 +1656,8 @@
                  ontouchstart="startCompPress(event, ${b.id})" 
                  onmouseup="endPress(event)" 
                  ontouchend="endPress(event)" 
+                ontouchmove="endPress(event)" 
+                ontouchcancel="endPress(event)" 
                  oncontextmenu="handleCompContext(event, ${b.id})">
               ${fmtDateUI(b.date)}${getDaysHTML(b.date, (isCompleted ? ((b.sales && b.sales.length > 0) ? b.sales[b.sales.length - 1].date : b.sellingDate) : null), false)}
             </div></div>
@@ -1839,6 +1863,56 @@
     function cancelQuickAdd() {
       quickAddStageIdx = null;
       render();
+    }
+    
+    function startNotesPress(e) {
+      if (editMode) return;
+      const el = e.currentTarget;
+      el.style.backgroundColor = '#1a1a1a';
+      longPressTimer = setTimeout(() => {
+        el.style.backgroundColor = '';
+        triggerQuickEditNotes();
+      }, 800);
+    }
+    function handleNotesContext(e) {
+      if (editMode) return;
+      e.preventDefault();
+      endPress(e);
+      triggerQuickEditNotes();
+    }
+    function triggerQuickEditNotes() {
+      if (editMode) return;
+      isQuickEditingNotes = true;
+      render();
+    }
+    function cancelQuickEditNotes() {
+      isQuickEditingNotes = false;
+      render();
+    }
+    async function saveQuickEditNotes() {
+      if (isSaving) return;
+      const notes = document.getElementById('qe_notes').value;
+      const b = batches.find(x => x.id === selId);
+      if (!b) return;
+      
+      const updatedB = { ...b, notes };
+      
+      // Optimistic Update
+      batches = batches.map(x => x.id === updatedB.id ? updatedB : x);
+      isQuickEditingNotes = false;
+      render();
+      
+      try {
+        isSaving = true;
+        const { error } = await sbClient.from('batches').update({ notes }).eq('id', updatedB.id);
+        if (error) throw error;
+      } catch (err) {
+        console.error('Error quick edit notes:', err);
+        alert('Sync failed. Refreshing data...');
+        loadData();
+      } finally {
+        isSaving = false;
+      }
     }
     async function saveQuickAdd() {
       if (isSaving) return;
