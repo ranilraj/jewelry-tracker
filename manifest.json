@@ -3,7 +3,7 @@
   "short_name": "Ranil Tracker",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0d0d0f",
+  "background_color": "#FAF6EB"
   "theme_color": "#0d0d0f",
   "icons": [
     {
