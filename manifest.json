@@ -3,14 +3,14 @@
   "short_name": "Ranil Tracker",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#FAF6EB"
+  "background_color": "#FAF6EB",
   "theme_color": "#0d0d0f",
   "icons": [
     {
       "src": "App_logo_1.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
