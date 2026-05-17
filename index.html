@@ -808,7 +808,8 @@
     }
 
     // State
-    let auth = localStorage.getItem('rj_auth_v2') === '1';
+    let auth = false;
+    let authSession = null;
     let batches = [];
     let view = 'list';
     let selId = null;
@@ -920,7 +921,7 @@
         setupRealtime();
       } catch (err) {
         console.error('Error loading data:', err);
-        syncError = 'Offline/Sync Failed';
+        syncError = 'Sync Failed: ' + (err.message || err.toString());
       } finally {
         loading = false;
       }
@@ -929,7 +930,10 @@
       }
     }
 
+    let realtimeSetup = false;
     function setupRealtime() {
+      if (realtimeSetup) return;
+      realtimeSetup = true;
       sbClient.channel('db-changes')
         .on(
           'postgres_changes',
@@ -1029,26 +1033,47 @@
     }
 
     // Views
-    function handleLogin() {
-      const u = document.getElementById('l_user').value;
-      const p = document.getElementById('l_pass').value;
-      if (u === 'ranilraj' && p === 'ranilraj18@abc') {
-        localStorage.setItem('rj_auth_v2', '1');
-        auth = true;
-        render();
-      } else {
-        alert('Incorrect username or password');
+    async function handleLogin() {
+      const email = document.getElementById('l_user').value;
+      const password = document.getElementById('l_pass').value;
+      const btn = document.getElementById('login_btn');
+      
+      if (!email || !password) {
+        alert('Please enter email and password');
+        return;
       }
+      
+      btn.textContent = 'Logging in...';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+
+      const { data, error } = await sbClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        alert('Login failed: ' + error.message);
+        btn.textContent = 'Login';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+      // Successful login will be caught by onAuthStateChange
     }
+
+    async function handleLogout() {
+      await sbClient.auth.signOut();
+    }
+
     function renderLogin() {
       return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:20px;">
     <div style="font-family:monospace;color:#f59e0b;font-size:12px;letter-spacing:4px;margin-bottom:24px;text-transform:uppercase;">RANIL JEWELERS</div>
     <div class="card" style="width:100%;max-width:320px;">
-      <label class="lbl">USERNAME</label>
-      <input class="inp" id="l_user" style="margin-bottom:16px;" placeholder="Username" />
+      <label class="lbl">EMAIL</label>
+      <input class="inp" id="l_user" type="email" style="margin-bottom:16px;" placeholder="admin@example.com" />
       <label class="lbl">PASSWORD</label>
       <input class="inp" id="l_pass" type="password" style="margin-bottom:24px;" placeholder="Password" />
-      <button class="btn-gold" style="width:100%;" onclick="handleLogin()">Login</button>
+      <button class="btn-gold" id="login_btn" style="width:100%;" onclick="handleLogin()">Login</button>
     </div>
   </div>`;
     }
@@ -1146,7 +1171,10 @@
             `<span style="font-size:10px; color:#10b981;">● Online</span>`)}
       </div>
     </div>
-    <button class="new-btn" onclick="goNew()">+ New Batch</button>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <button class="btn-del" style="padding:4px 10px;font-size:10px;background:transparent;border:1px solid #444;color:#aaa;" onclick="handleLogout()">Logout</button>
+      <button class="new-btn" onclick="goNew()">+ New Batch</button>
+    </div>
   </div>
   <div class="content">
     <div style="font-family:monospace;font-size:11px;color:#888;letter-spacing:1.5px;margin-bottom:10px;">LAST 30 DAYS</div>
@@ -2311,8 +2339,26 @@
       });
     }
 
-    render();
-    loadData();
+    sbClient.auth.onAuthStateChange((_event, session) => {
+      auth = !!session;
+      authSession = session;
+      if (auth) {
+        loadData();
+      } else {
+        batches = [];
+        render();
+      }
+    });
+
+    sbClient.auth.getSession().then(({ data: { session } }) => {
+      auth = !!session;
+      authSession = session;
+      if (auth) {
+        loadData();
+      } else {
+        render();
+      }
+    });
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => {
